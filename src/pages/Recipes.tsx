@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { RecipeCard } from "@/components/RecipeCard";
+import RecipeCard from "@/components/RecipeCard"; // Fixed import statement
 import NavBar from '@/components/NavBar';
 
 const Recipes = () => {

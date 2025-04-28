@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ImageOff, Loader2 } from 'lucide-react';
 
 interface ImageLoaderProps {
@@ -23,6 +23,25 @@ const ImageLoader: React.FC<ImageLoaderProps> = ({
   const [error, setError] = useState(false);
   const [imageSrc, setImageSrc] = useState<string | undefined>(undefined);
 
+  // Handle image cache busting in a memoized function
+  const prepareSrc = useCallback((url: string | undefined): string | undefined => {
+    if (!url) return undefined;
+    
+    // Only add cache busting for Supabase URLs that don't already have it
+    const needsCacheBuster = url.includes('supabase') && 
+                           !url.startsWith('blob:') && 
+                           !url.startsWith('data:') && 
+                           !url.includes('v=');
+    
+    if (needsCacheBuster) {
+      const baseUrl = url.includes('?') ? url.split('?')[0] : url;
+      const cacheBuster = `?v=${Date.now()}`;
+      return `${baseUrl}${cacheBuster}`;
+    }
+    
+    return url;
+  }, []);
+
   useEffect(() => {
     if (!src) {
       setError(true);
@@ -33,36 +52,29 @@ const ImageLoader: React.FC<ImageLoaderProps> = ({
     // Reset states when src changes
     setLoading(true);
     setError(false);
-
-    // Only add cache busting for Supabase URLs that don't already have it
-    const needsCacheBuster = src.includes('supabase') && 
-                            !src.startsWith('blob:') && 
-                            !src.startsWith('data:') && 
-                            !src.includes('v=');
     
-    if (needsCacheBuster) {
-      const baseUrl = src.includes('?') ? src.split('?')[0] : src;
-      const cacheBuster = `?v=${Date.now()}`;
-      setImageSrc(`${baseUrl}${cacheBuster}`);
-    } else {
-      setImageSrc(src);
-    }
+    const processedSrc = prepareSrc(src);
+    setImageSrc(processedSrc);
 
     // Preload the image
     const img = new Image();
-    img.src = needsCacheBuster ? `${src.includes('?') ? src.split('?')[0] : src}?v=${Date.now()}` : src;
-    img.onload = () => setLoading(false);
-    img.onerror = () => {
+    img.src = processedSrc || '';
+    
+    const handleLoad = () => setLoading(false);
+    const handleError = () => {
       console.error(`Failed to load image: ${src}`);
       setError(true);
       setLoading(false);
     };
+    
+    img.onload = handleLoad;
+    img.onerror = handleError;
 
     return () => {
       img.onload = null;
       img.onerror = null;
     };
-  }, [src]);
+  }, [src, prepareSrc]);
 
   if (error) {
     return (

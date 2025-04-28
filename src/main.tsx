@@ -10,10 +10,11 @@ const optimizeImages = () => {
     caches.keys().then(cacheNames => {
       cacheNames.forEach(cacheName => {
         if (cacheName.includes('image')) {
-          caches.delete(cacheName);
+          caches.delete(cacheName)
+            .then(() => console.log(`Cache ${cacheName} deleted`))
+            .catch(err => console.error(`Failed to delete cache ${cacheName}:`, err));
         }
       });
-      console.log('Image caches cleared');
     }).catch(err => {
       console.error('Failed to clear caches:', err);
     });
@@ -34,6 +35,7 @@ const optimizeImages = () => {
       const src = img.getAttribute('src');
       
       if (src && src.includes('supabase') && !src.includes('v=')) {
+        console.log(`Applying cache busting to failed image: ${src}`);
         const baseUrl = src.includes('?') ? src.split('?')[0] : src;
         const cacheBuster = `?v=${Date.now()}`;
         img.setAttribute('src', `${baseUrl}${cacheBuster}`);

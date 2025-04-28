@@ -12,7 +12,6 @@ import PlannerHeader from '@/components/PlannerHeader';
 import CalendarView from '@/components/CalendarView';
 import FavoritesSection from '@/components/FavoritesSection';
 import { generateRecipe } from '@/utils/recipeGenerator';
-import NavBar from '@/components/NavBar';
 
 type ViewType = 'day' | 'week' | 'month';
 
@@ -90,7 +89,6 @@ const Planner = () => {
 
   return (
     <div className="min-h-screen bg-[#F8F5FF]">
-      <NavBar />
       <div className="p-4 md:p-8 max-w-7xl mx-auto">
         <div className="space-y-8">
           <PlannerHeader 
@@ -119,7 +117,7 @@ const Planner = () => {
               </div>
             }
             content={
-              <AnimatePresence mode="wait">
+              <AnimatePresence mode="sync">
                 {isLoading ? (
                   <motion.div
                     key="loading"
@@ -143,7 +141,7 @@ const Planner = () => {
                     transition={{ duration: 0.3 }}
                   >
                     <Card className="overflow-hidden shadow-md p-6 border border-purple-100">
-                      <AnimatePresence mode="wait">
+                      <AnimatePresence mode="sync">
                         {view === 'day' && (
                           <motion.div
                             key="day-view"

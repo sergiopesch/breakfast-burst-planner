@@ -2,17 +2,24 @@
 import React from 'react';
 import NavBar from './NavBar';
 import Footer from './Footer';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  
   // Apply cache busting only once when the layout first loads
   useEffect(() => {
+    // Cleanup previous observer if it exists
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+    
     // Create a more efficient intersection observer to load images properly
-    const observer = new IntersectionObserver((entries) => {
+    observerRef.current = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           const img = entry.target as HTMLImageElement;
@@ -26,7 +33,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           }
           
           // Stop observing after handling the image
-          observer.unobserve(img);
+          observerRef.current?.unobserve(img);
         }
       });
     }, {
@@ -37,12 +44,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     // Start observing all images
     document.querySelectorAll('img').forEach(img => {
       if (!img.complete || img.naturalHeight === 0) {
-        observer.observe(img);
+        observerRef.current?.observe(img);
       }
     });
     
     // Disconnect the observer when the component unmounts
-    return () => observer.disconnect();
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
   }, []);
 
   return (

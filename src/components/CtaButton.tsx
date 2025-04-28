@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 type CtaButtonProps = {
   to: string;
@@ -12,10 +12,10 @@ const CtaButton: React.FC<CtaButtonProps> = ({ to, children }) => {
   return (
     <Link 
       to={to} 
-      className="neumorphic inline-flex items-center justify-center gap-2 px-6 py-3 font-medium text-lg transition-all duration-300 hover:shadow-[8px_8px_20px_rgba(0,0,0,0.1),-8px_-8px_20px_rgba(255,255,255,0.8)] dark:hover:shadow-[8px_8px_20px_rgba(0,0,0,0.3),-8px_-8px_20px_rgba(255,255,255,0.05)]"
+      className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#FF385C] px-6 py-3 font-medium text-lg text-white transition-all duration-300 hover:bg-[#E00B41] hover:shadow-lg"
     >
       {children}
-      <ChevronRight className="h-5 w-5" />
+      <ArrowRight className="h-5 w-5" />
     </Link>
   );
 };

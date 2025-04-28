@@ -6,7 +6,6 @@ import CtaButton from '../components/CtaButton';
 
 const Index = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const userName = getUserName();
   
   useEffect(() => {
     setIsVisible(true);
@@ -17,8 +16,8 @@ const Index = () => {
       <div className={`space-y-8 ${isVisible ? 'fade-up' : 'opacity-0'}`}>
         {/* Greeting Header */}
         <header className="mb-8">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-2">Good morning, {userName}!</h1>
-          <p className="text-lg md:text-xl text-muted-foreground">What's for breakfast today?</p>
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-medium mb-2">Good morning, {getUserName()}!</h1>
+          <p className="text-lg md:text-xl text-gray-500">What's for breakfast today?</p>
         </header>
         
         {/* Main Content */}
@@ -26,8 +25,8 @@ const Index = () => {
           {/* Recipe Card */}
           <div className="md:col-span-1">
             <div className="mb-4">
-              <h2 className="text-xl font-semibold">Surprise me</h2>
-              <p className="text-muted-foreground">Try something new today</p>
+              <h2 className="text-xl font-medium">Surprise me</h2>
+              <p className="text-gray-500">Try something new today</p>
             </div>
             <RecipeCard />
           </div>
@@ -35,8 +34,8 @@ const Index = () => {
           {/* CTA Section */}
           <div className="md:col-span-1 flex flex-col justify-center items-start">
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Plan your week</h2>
-              <p className="text-muted-foreground mb-4">Organize your breakfast schedule to save time and avoid repetition</p>
+              <h2 className="text-xl font-medium">Plan your week</h2>
+              <p className="text-gray-500 mb-4">Organize your breakfast schedule to save time and avoid repetition</p>
               <CtaButton to="/planner">Go to meal planner</CtaButton>
             </div>
           </div>

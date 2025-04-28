@@ -1,3 +1,4 @@
+
 -- Meal Planner Database Setup
 -- This file contains SQL to set up all necessary tables and relationships
 -- for the meal planning application. It includes recipes, planned_meals,
@@ -119,7 +120,7 @@ BEGIN
     FROM planned_meals pm
     JOIN recipes r ON pm.recipe_id = r.id';
     
-    EXECUTE 'ALTER VIEW meal_plans OWNER TO authenticated';
+    -- Remove the problematic ownership change
     EXECUTE 'COMMENT ON VIEW meal_plans IS ''Join of planned meals with recipe details''';
   END IF;
 END $$;

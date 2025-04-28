@@ -88,27 +88,37 @@ BEGIN
 END $$;
 
 -- Also, let's create a view to join these tables for easier querying
-CREATE OR REPLACE VIEW meal_plans AS
-SELECT 
-  pm.id, 
-  pm.user_id, 
-  pm.date, 
-  pm.time, 
-  pm.status,
-  r.id as recipe_id, 
-  r.title, 
-  r.description,
-  r.prep_time, 
-  r.image_url, 
-  r.ingredients, 
-  r.instructions,
-  r.servings
-FROM planned_meals pm
-JOIN recipes r ON pm.recipe_id = r.id;
-
--- Create RLS policy for the view
-ALTER VIEW meal_plans OWNER TO authenticated;
-COMMENT ON VIEW meal_plans IS 'Join of planned meals with recipe details';
+-- First check if the view exists
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 
+    FROM pg_views
+    WHERE viewname = 'meal_plans'
+  ) THEN
+    EXECUTE '
+    CREATE VIEW meal_plans AS
+    SELECT 
+      pm.id, 
+      pm.user_id, 
+      pm.date, 
+      pm.time, 
+      pm.status,
+      r.id as recipe_id, 
+      r.title, 
+      r.description,
+      r.prep_time, 
+      r.image_url, 
+      r.ingredients, 
+      r.instructions,
+      r.servings
+    FROM planned_meals pm
+    JOIN recipes r ON pm.recipe_id = r.id';
+    
+    EXECUTE 'ALTER VIEW meal_plans OWNER TO authenticated';
+    EXECUTE 'COMMENT ON VIEW meal_plans IS ''Join of planned meals with recipe details''';
+  END IF;
+END $$;
 
 -- If needed, create storage bucket for recipe images
 DO $$
@@ -123,29 +133,68 @@ BEGIN
   END;
 END $$;
 
--- Set up storage policies for recipe images
-BEGIN;
-  -- Policy for reading images (public access)
-  DROP POLICY IF EXISTS "Anyone can view recipe images" ON storage.objects;
-  CREATE POLICY "Anyone can view recipe images" 
-    ON storage.objects FOR SELECT
-    USING (bucket_id = 'recipe-images');
-
-  -- Policy for uploading images (authenticated users only)
-  DROP POLICY IF EXISTS "Auth users can upload recipe images" ON storage.objects;
-  CREATE POLICY "Auth users can upload recipe images" 
-    ON storage.objects FOR INSERT
-    WITH CHECK (bucket_id = 'recipe-images' AND auth.role() = 'authenticated');
-
-  -- Policy for updating own images
-  DROP POLICY IF EXISTS "Users can update own recipe images" ON storage.objects;
-  CREATE POLICY "Users can update own recipe images" 
-    ON storage.objects FOR UPDATE
-    USING (bucket_id = 'recipe-images' AND auth.uid()::text = (storage.foldername(name))[1]);
-
-  -- Policy for deleting own images
-  DROP POLICY IF EXISTS "Users can delete own recipe images" ON storage.objects;
-  CREATE POLICY "Users can delete own recipe images" 
-    ON storage.objects FOR DELETE
-    USING (bucket_id = 'recipe-images' AND auth.uid()::text = (storage.foldername(name))[1]);
-COMMIT;
+-- Set up storage policies for recipe images - SAFELY
+DO $$
+DECLARE
+  policy_exists BOOLEAN;
+BEGIN
+  -- Check if "Anyone can view recipe images" policy exists
+  SELECT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE policyname = 'Anyone can view recipe images' 
+    AND tablename = 'objects' 
+    AND schemaname = 'storage'
+  ) INTO policy_exists;
+  
+  IF NOT policy_exists THEN
+    -- Create the policy if it doesn't exist
+    EXECUTE 'CREATE POLICY "Anyone can view recipe images" 
+      ON storage.objects FOR SELECT
+      USING (bucket_id = ''recipe-images'')';
+  END IF;
+  
+  -- Check if "Auth users can upload recipe images" policy exists
+  SELECT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE policyname = 'Auth users can upload recipe images' 
+    AND tablename = 'objects' 
+    AND schemaname = 'storage'
+  ) INTO policy_exists;
+  
+  IF NOT policy_exists THEN
+    -- Create the policy if it doesn't exist
+    EXECUTE 'CREATE POLICY "Auth users can upload recipe images" 
+      ON storage.objects FOR INSERT
+      WITH CHECK (bucket_id = ''recipe-images'' AND auth.role() = ''authenticated'')';
+  END IF;
+  
+  -- Check if "Users can update own recipe images" policy exists
+  SELECT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE policyname = 'Users can update own recipe images' 
+    AND tablename = 'objects' 
+    AND schemaname = 'storage'
+  ) INTO policy_exists;
+  
+  IF NOT policy_exists THEN
+    -- Create the policy if it doesn't exist
+    EXECUTE 'CREATE POLICY "Users can update own recipe images" 
+      ON storage.objects FOR UPDATE
+      USING (bucket_id = ''recipe-images'' AND auth.uid()::text = (storage.foldername(name))[1])';
+  END IF;
+  
+  -- Check if "Users can delete own recipe images" policy exists
+  SELECT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE policyname = 'Users can delete own recipe images' 
+    AND tablename = 'objects' 
+    AND schemaname = 'storage'
+  ) INTO policy_exists;
+  
+  IF NOT policy_exists THEN
+    -- Create the policy if it doesn't exist
+    EXECUTE 'CREATE POLICY "Users can delete own recipe images" 
+      ON storage.objects FOR DELETE
+      USING (bucket_id = ''recipe-images'' AND auth.uid()::text = (storage.foldername(name))[1])';
+  END IF;
+END $$;

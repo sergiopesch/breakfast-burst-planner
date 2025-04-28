@@ -71,23 +71,23 @@ const RecipeCard: React.FC = () => {
       <DialogTrigger asChild>
         <div className="group cursor-pointer">
           <div className="neumorphic overflow-hidden rounded-xl transition-all duration-300 hover:shadow-[8px_8px_20px_rgba(0,0,0,0.1),-8px_-8px_20px_rgba(255,255,255,0.8)] dark:hover:shadow-[8px_8px_20px_rgba(0,0,0,0.3),-8px_-8px_20px_rgba(255,255,255,0.05)]">
-            <div className="relative aspect-[16/9] w-full overflow-hidden">
+            <div className="relative aspect-video max-h-[280px] w-full overflow-hidden">
               <img
                 src={recipe.image}
                 alt={recipe.title}
                 className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
-              <button className="absolute right-3 top-3 rounded-full bg-white p-2 transition-transform hover:scale-110">
+              <button className="absolute right-3 top-3 rounded-full bg-white/90 backdrop-blur-sm p-2 transition-transform hover:scale-110 hover:bg-[#4F2D9E] hover:text-white">
                 <Heart className="h-5 w-5" />
               </button>
             </div>
             <div className="p-4">
               <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-gray-500" />
-                <span className="text-sm text-gray-500">{recipe.prepTime}</span>
+                <Clock className="h-4 w-4 text-[#4F2D9E]" />
+                <span className="text-sm text-gray-600">{recipe.prepTime}</span>
               </div>
-              <h2 className="mt-2 text-lg font-medium">{recipe.title}</h2>
-              <p className="mt-1 text-sm text-gray-500">{recipe.description}</p>
+              <h2 className="mt-2 text-lg font-medium text-[#4F2D9E]">{recipe.title}</h2>
+              <p className="mt-1 text-sm text-gray-600">{recipe.description}</p>
             </div>
           </div>
         </div>
@@ -95,9 +95,9 @@ const RecipeCard: React.FC = () => {
 
       <DialogContent className="sm:max-w-[425px]">
         <div className="space-y-4 p-4">
-          <h2 className="text-xl font-semibold">{recipe.title}</h2>
+          <h2 className="text-xl font-semibold text-[#4F2D9E]">{recipe.title}</h2>
           <div className="space-y-2">
-            <h3 className="font-medium">Ingredients:</h3>
+            <h3 className="font-medium text-[#4F2D9E]">Ingredients:</h3>
             <ul className="list-inside list-disc space-y-1 text-gray-600">
               {recipe.ingredients.map((ingredient, index) => (
                 <li key={index}>{ingredient}</li>
@@ -105,7 +105,7 @@ const RecipeCard: React.FC = () => {
             </ul>
           </div>
           <div className="space-y-2">
-            <h3 className="font-medium">Instructions:</h3>
+            <h3 className="font-medium text-[#4F2D9E]">Instructions:</h3>
             <ol className="list-inside list-decimal space-y-2 text-gray-600">
               {recipe.instructions.map((instruction, index) => (
                 <li key={index}>{instruction}</li>

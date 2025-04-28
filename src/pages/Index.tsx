@@ -5,11 +5,15 @@ import CtaButton from '../components/CtaButton';
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Coffee, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { BREAKFAST_RECIPES } from '../components/RecipeCard';
 
 const Index = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [recipeKey, setRecipeKey] = useState(0);
   const [favoriteCount, setFavoriteCount] = useState(0);
+  const [currentRecipe, setCurrentRecipe] = useState(() => 
+    BREAKFAST_RECIPES[Math.floor(Math.random() * BREAKFAST_RECIPES.length)]
+  );
   
   useEffect(() => {
     setIsVisible(true);
@@ -39,6 +43,7 @@ const Index = () => {
   }, []);
 
   const handleRandomize = () => {
+    setCurrentRecipe(BREAKFAST_RECIPES[Math.floor(Math.random() * BREAKFAST_RECIPES.length)]);
     setRecipeKey(prev => prev + 1);
   };
 
@@ -93,7 +98,7 @@ const Index = () => {
                 </AnimatePresence>
               </div>
             </div>
-            <RecipeCard key={recipeKey} />
+            <RecipeCard key={recipeKey} recipe={currentRecipe} />
           </motion.div>
           
           {/* CTA Section */}

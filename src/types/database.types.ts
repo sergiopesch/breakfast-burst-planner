@@ -6,6 +6,7 @@ export interface RecipeDB {
   description: string;
   prep_time?: string;
   image_url?: string;
+  image_path?: string; // Add path to stored image in Supabase
   ingredients?: string[];
   instructions?: string[];
   servings?: number;

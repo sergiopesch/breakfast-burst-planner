@@ -1,12 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
-import { Heart, Clock, Coffee } from 'lucide-react';
+import { Heart, Clock, Coffee, Upload, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { motion } from 'framer-motion';
 import { useToast } from "@/hooks/use-toast";
-import { supabase, handleSupabaseError } from '@/lib/supabase';
+import { supabase, handleSupabaseError, uploadRecipeImage } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { v4 as uuidv4 } from 'uuid';
+import { Button } from "@/components/ui/button";
 
 // Updated with appropriate images matching recipe content
 const BREAKFAST_RECIPES = [
@@ -117,6 +118,7 @@ export { BREAKFAST_RECIPES };
 const RecipeCard: React.FC = () => {
   const [recipe, setRecipe] = useState(() => BREAKFAST_RECIPES[Math.floor(Math.random() * BREAKFAST_RECIPES.length)]);
   const [isLiked, setIsLiked] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -181,15 +183,46 @@ const RecipeCard: React.FC = () => {
           });
         } else {
           // Add to Supabase
+          const recipeId = uuidv4();
+          
+          // Upload image to Supabase Storage if available
+          let imagePath = null;
+          let imageUrl = recipe.image;
+          
+          if (recipe.image && recipe.image.startsWith('http')) {
+            try {
+              // Fetch image and convert to File object for upload
+              setUploadingImage(true);
+              const response = await fetch(recipe.image);
+              const blob = await response.blob();
+              const file = new File([blob], `recipe-${recipeId}.jpg`, { type: 'image/jpeg' });
+              
+              // Upload to Supabase Storage
+              const { path, url, error } = await uploadRecipeImage(file, user.id);
+              
+              if (!error && path && url) {
+                imagePath = path;
+                imageUrl = url;
+              }
+            } catch (error) {
+              console.error('Error uploading image to Supabase:', error);
+              // Continue with the original image URL if upload fails
+            } finally {
+              setUploadingImage(false);
+            }
+          }
+          
+          // Add recipe to database
           const { error } = await supabase
             .from('recipes')
             .insert({
-              id: uuidv4(),
+              id: recipeId,
               user_id: user.id,
               title: recipe.title,
               description: recipe.description,
               prep_time: recipe.prepTime,
-              image_url: recipe.image,
+              image_url: imageUrl,
+              image_path: imagePath,
               ingredients: recipe.ingredients,
               instructions: recipe.instructions
             });
@@ -263,8 +296,13 @@ const RecipeCard: React.FC = () => {
               <button 
                 className={`absolute right-3 top-3 rounded-full ${isLiked ? 'bg-[#4F2D9E] text-white' : 'bg-white/90 text-[#4F2D9E]'} backdrop-blur-sm p-2 transition-transform hover:scale-110`}
                 onClick={handleLike}
+                disabled={uploadingImage}
               >
-                <Heart className={`h-5 w-5 ${isLiked ? 'fill-white' : ''}`} />
+                {uploadingImage ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Heart className={`h-5 w-5 ${isLiked ? 'fill-white' : ''}`} />
+                )}
               </button>
             </div>
             <div className="p-4">

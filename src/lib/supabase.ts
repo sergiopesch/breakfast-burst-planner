@@ -24,3 +24,46 @@ export const handleSupabaseError = (error: any, toast?: any) => {
   }
   return error;
 };
+
+// Storage helper functions
+export const uploadRecipeImage = async (file: File, userId: string) => {
+  try {
+    const fileExt = file.name.split('.').pop();
+    const filePath = `${userId}/recipes/${Math.random().toString(36).substring(2)}.${fileExt}`;
+    
+    // Upload file to Supabase storage
+    const { data, error } = await supabase.storage
+      .from('recipe-images')
+      .upload(filePath, file);
+      
+    if (error) throw error;
+    
+    // Get public URL for the uploaded file
+    const { data: urlData } = supabase.storage
+      .from('recipe-images')
+      .getPublicUrl(filePath);
+      
+    return {
+      path: filePath,
+      url: urlData.publicUrl,
+      error: null
+    };
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    return { path: null, url: null, error };
+  }
+};
+
+export const deleteRecipeImage = async (filePath: string) => {
+  try {
+    const { error } = await supabase.storage
+      .from('recipe-images')
+      .remove([filePath]);
+      
+    if (error) throw error;
+    return { success: true, error: null };
+  } catch (error) {
+    console.error('Error deleting image:', error);
+    return { success: false, error };
+  }
+};

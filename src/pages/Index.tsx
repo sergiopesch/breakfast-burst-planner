@@ -4,7 +4,8 @@ import { getUserName } from '../utils/getUserName';
 import RecipeCard from '../components/RecipeCard';
 import CtaButton from '../components/CtaButton';
 import { Button } from "@/components/ui/button";
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Coffee } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const Index = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -19,18 +20,31 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen p-6 md:p-8 max-w-4xl mx-auto">
+    <div className="min-h-screen p-6 md:p-8 max-w-4xl mx-auto bg-[#F8F5FF]">
       <div className={`space-y-8 ${isVisible ? 'fade-up' : 'opacity-0'}`}>
         {/* Greeting Header */}
-        <header className="mb-8">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-medium mb-2 text-[#4F2D9E]">Good morning!</h1>
+        <motion.header 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-8"
+        >
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-medium mb-2 text-[#4F2D9E] flex items-center">
+            <Coffee className="h-8 w-8 mr-3" />
+            Good morning!
+          </h1>
           <p className="text-lg md:text-xl text-gray-500">What's for breakfast today?</p>
-        </header>
+        </motion.header>
         
         {/* Main Content */}
         <div className="flex flex-col gap-8">
           {/* Recipe Section */}
-          <div className="w-full">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="w-full"
+          >
             <div className="flex justify-between items-center mb-4">
               <div>
                 <Button
@@ -43,16 +57,24 @@ const Index = () => {
               </div>
             </div>
             <RecipeCard key={recipeKey} />
-          </div>
+          </motion.div>
           
           {/* CTA Section */}
-          <div className="w-full mt-8 p-6 bg-[#F7F5FF] rounded-xl">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="w-full mt-8 p-6 bg-gradient-to-br from-white to-[#F0EBFF] rounded-xl shadow-sm"
+          >
             <div className="space-y-4">
-              <h2 className="text-xl font-medium text-[#4F2D9E]">Plan your week</h2>
-              <p className="text-gray-600 mb-4">Organize your breakfast schedule to save time and avoid repetition</p>
-              <CtaButton to="/planner">Go to meal planner</CtaButton>
+              <h2 className="text-xl font-medium text-[#4F2D9E] flex items-center">
+                <Coffee className="h-5 w-5 mr-2" />
+                Plan your breakfast week
+              </h2>
+              <p className="text-gray-600 mb-4">Organize your morning meals to start each day right</p>
+              <CtaButton to="/planner">Go to breakfast planner</CtaButton>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>

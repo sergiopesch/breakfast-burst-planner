@@ -1,9 +1,10 @@
 
 import React from 'react';
-import { Heart, Clock } from 'lucide-react';
+import { Heart, Clock, Coffee } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { motion } from 'framer-motion';
 
-const RECIPES = [
+const BREAKFAST_RECIPES = [
   {
     title: "Quick Banana Oatmeal",
     description: "A healthy breakfast bowl",
@@ -60,47 +61,108 @@ const RECIPES = [
       "Top with granola and drizzle honey",
       "Garnish with mint leaves"
     ]
+  },
+  {
+    title: "Breakfast Smoothie Bowl",
+    description: "Nutrient-packed morning fuel",
+    prepTime: "7 min prep",
+    image: "https://images.unsplash.com/photo-1546039907-7fa05f864c02?w=800&auto=format&fit=crop&q=60",
+    ingredients: [
+      "1 frozen banana",
+      "1/2 cup frozen berries",
+      "1/4 cup Greek yogurt",
+      "1/4 cup almond milk",
+      "Toppings: granola, fresh fruit, nuts"
+    ],
+    instructions: [
+      "Blend frozen banana, berries, yogurt and milk until smooth",
+      "Pour into a bowl",
+      "Arrange toppings artfully on top",
+      "Serve immediately before it melts"
+    ]
+  },
+  {
+    title: "Breakfast Quesadilla",
+    description: "Savory morning delight",
+    prepTime: "10 min prep",
+    image: "https://images.unsplash.com/photo-1600824486239-1f29ccc0a2e3?w=800&auto=format&fit=crop&q=60",
+    ingredients: [
+      "2 flour tortillas",
+      "2 eggs, scrambled",
+      "1/4 cup shredded cheese",
+      "2 tbsp salsa",
+      "Avocado slices for serving"
+    ],
+    instructions: [
+      "Place tortilla in a hot pan",
+      "Add scrambled eggs and cheese",
+      "Top with second tortilla and flip when golden",
+      "Serve with salsa and avocado"
+    ]
   }
 ];
 
 const RecipeCard: React.FC = () => {
-  const recipe = RECIPES[Math.floor(Math.random() * RECIPES.length)];
+  const recipe = BREAKFAST_RECIPES[Math.floor(Math.random() * BREAKFAST_RECIPES.length)];
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <div className="group cursor-pointer">
+        <motion.div 
+          className="group cursor-pointer"
+          whileHover={{ y: -5 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
           <div className="neumorphic overflow-hidden rounded-xl transition-all duration-300 hover:shadow-[8px_8px_20px_rgba(0,0,0,0.1),-8px_-8px_20px_rgba(255,255,255,0.8)] dark:hover:shadow-[8px_8px_20px_rgba(0,0,0,0.3),-8px_-8px_20px_rgba(255,255,255,0.05)]">
-            <div className="relative aspect-video max-h-[280px] w-full overflow-hidden">
+            <div className="relative aspect-square max-h-[240px] w-full overflow-hidden">
               <img
                 src={recipe.image}
                 alt={recipe.title}
                 className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
               <button className="absolute right-3 top-3 rounded-full bg-white/90 backdrop-blur-sm p-2 transition-transform hover:scale-110 hover:bg-[#4F2D9E] hover:text-white">
                 <Heart className="h-5 w-5" />
               </button>
             </div>
             <div className="p-4">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 mb-1">
                 <Clock className="h-4 w-4 text-[#4F2D9E]" />
                 <span className="text-sm text-gray-600">{recipe.prepTime}</span>
               </div>
-              <h2 className="mt-2 text-lg font-medium text-[#4F2D9E]">{recipe.title}</h2>
+              <h2 className="mt-2 text-lg font-medium text-[#4F2D9E] flex items-center">
+                <Coffee className="h-4 w-4 mr-2" />
+                {recipe.title}
+              </h2>
               <p className="mt-1 text-sm text-gray-600">{recipe.description}</p>
             </div>
           </div>
-        </div>
+        </motion.div>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-[425px]">
-        <div className="space-y-4 p-4">
-          <h2 className="text-xl font-semibold text-[#4F2D9E]">{recipe.title}</h2>
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="space-y-4 p-4"
+        >
+          <h2 className="text-xl font-semibold text-[#4F2D9E] flex items-center">
+            <Coffee className="h-5 w-5 mr-2" />
+            {recipe.title}
+          </h2>
           <div className="space-y-2">
             <h3 className="font-medium text-[#4F2D9E]">Ingredients:</h3>
             <ul className="list-inside list-disc space-y-1 text-gray-600">
               {recipe.ingredients.map((ingredient, index) => (
-                <li key={index}>{ingredient}</li>
+                <motion.li 
+                  key={index} 
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  {ingredient}
+                </motion.li>
               ))}
             </ul>
           </div>
@@ -108,11 +170,18 @@ const RecipeCard: React.FC = () => {
             <h3 className="font-medium text-[#4F2D9E]">Instructions:</h3>
             <ol className="list-inside list-decimal space-y-2 text-gray-600">
               {recipe.instructions.map((instruction, index) => (
-                <li key={index}>{instruction}</li>
+                <motion.li 
+                  key={index}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 + index * 0.05 }}
+                >
+                  {instruction}
+                </motion.li>
               ))}
             </ol>
           </div>
-        </div>
+        </motion.div>
       </DialogContent>
     </Dialog>
   );

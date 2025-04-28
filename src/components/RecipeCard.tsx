@@ -1,8 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { Heart, Clock, Coffee } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { motion } from 'framer-motion';
 import { useToast } from "@/hooks/use-toast";
+import { supabase, handleSupabaseError } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
+import { v4 as uuidv4 } from 'uuid';
 
 // Updated with appropriate images matching recipe content
 const BREAKFAST_RECIPES = [
@@ -114,18 +118,107 @@ const RecipeCard: React.FC = () => {
   const [recipe, setRecipe] = useState(() => BREAKFAST_RECIPES[Math.floor(Math.random() * BREAKFAST_RECIPES.length)]);
   const [isLiked, setIsLiked] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
-    // Check if recipe is already liked
-    const likedRecipes = JSON.parse(localStorage.getItem('likedRecipes') || '[]');
-    const isAlreadyLiked = likedRecipes.some((liked: any) => liked.id === recipe.id);
-    setIsLiked(isAlreadyLiked);
-  }, [recipe]);
+    const checkIfLiked = async () => {
+      if (user) {
+        try {
+          // Check if recipe is already liked in Supabase
+          const { data, error } = await supabase
+            .from('recipes')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('title', recipe.title)
+            .single();
+          
+          if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+            console.error('Error checking liked status:', error);
+          }
+          
+          setIsLiked(!!data);
+        } catch (error) {
+          console.error('Error checking if recipe is liked:', error);
+          // Fall back to localStorage if Supabase fails
+          const likedRecipes = JSON.parse(localStorage.getItem('likedRecipes') || '[]');
+          const isAlreadyLiked = likedRecipes.some((liked: any) => liked.id === recipe.id);
+          setIsLiked(isAlreadyLiked);
+        }
+      } else {
+        // If no user, use localStorage
+        const likedRecipes = JSON.parse(localStorage.getItem('likedRecipes') || '[]');
+        const isAlreadyLiked = likedRecipes.some((liked: any) => liked.id === recipe.id);
+        setIsLiked(isAlreadyLiked);
+      }
+    };
+    
+    checkIfLiked();
+  }, [recipe, user]);
 
-  const handleLike = (e: React.MouseEvent) => {
+  const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
+    if (user) {
+      try {
+        if (isLiked) {
+          // Remove from Supabase
+          const { error } = await supabase
+            .from('recipes')
+            .delete()
+            .eq('user_id', user.id)
+            .eq('title', recipe.title);
+          
+          if (error) {
+            handleSupabaseError(error, toast);
+            return;
+          }
+          
+          toast({
+            title: "Removed from favorites",
+            description: `${recipe.title} has been removed from your favorites`,
+            duration: 2000,
+          });
+        } else {
+          // Add to Supabase
+          const { error } = await supabase
+            .from('recipes')
+            .insert({
+              id: uuidv4(),
+              user_id: user.id,
+              title: recipe.title,
+              description: recipe.description,
+              prep_time: recipe.prepTime,
+              image_url: recipe.image,
+              ingredients: recipe.ingredients,
+              instructions: recipe.instructions
+            });
+          
+          if (error) {
+            handleSupabaseError(error, toast);
+            return;
+          }
+          
+          toast({
+            title: "Added to favorites",
+            description: `${recipe.title} has been added to your favorites`,
+            duration: 2000,
+          });
+        }
+        
+        setIsLiked(!isLiked);
+      } catch (error) {
+        console.error('Error updating like status in Supabase:', error);
+        // Fall back to localStorage if Supabase fails
+        handleLocalStorageLike();
+      }
+    } else {
+      // If no user, use localStorage
+      handleLocalStorageLike();
+    }
+  };
+  
+  const handleLocalStorageLike = () => {
     const likedRecipes = JSON.parse(localStorage.getItem('likedRecipes') || '[]');
     let updatedLikedRecipes;
     

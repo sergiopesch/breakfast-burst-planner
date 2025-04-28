@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Session, User } from '@supabase/supabase-js';
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from 'react-router-dom';
 
 interface AuthContextProps {
   user: User | null;
@@ -40,20 +41,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (session) {
         setSession(session);
         setUser(session.user);
-        await migrateLocalDataToSupabase(session.user.id);
+        console.log("User authenticated:", session.user.email);
       }
       
       // Set up auth state change listener
       const { data: { subscription } } = supabase.auth.onAuthStateChange(
         async (_event, session) => {
+          console.log("Auth state changed:", _event);
           setSession(session);
           setUser(session?.user ?? null);
           setLoading(false);
-          
-          // If a user just signed in, migrate their local data
-          if (session?.user && _event === 'SIGNED_IN') {
-            await migrateLocalDataToSupabase(session.user.id);
-          }
         }
       );
       
@@ -65,96 +62,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     
     initializeAuth();
   }, [toast]);
-  
-  // Function to migrate localStorage data to Supabase when a user signs in
-  const migrateLocalDataToSupabase = async (userId: string) => {
-    try {
-      // Check if we've already migrated data for this user
-      const migrationFlagKey = `data-migrated-${userId}`;
-      const alreadyMigrated = localStorage.getItem(migrationFlagKey);
-      
-      if (alreadyMigrated) {
-        return;
-      }
-      
-      // Get local recipes and planned meals
-      const localRecipes = JSON.parse(localStorage.getItem('likedRecipes') || '[]');
-      const localPlannedMeals = JSON.parse(localStorage.getItem('plannedMeals') || '{}');
-      
-      // Migrate recipes
-      if (localRecipes.length > 0) {
-        for (const recipe of localRecipes) {
-          const { error } = await supabase.from('recipes').insert({
-            user_id: userId,
-            title: recipe.title,
-            description: recipe.description,
-            prep_time: recipe.prepTime,
-            image_url: recipe.image,
-            ingredients: recipe.ingredients,
-            instructions: recipe.instructions,
-            servings: recipe.servings
-          });
-          
-          if (error) {
-            console.error('Error migrating recipe:', error);
-          }
-        }
-      }
-      
-      // Migrate planned meals
-      if (Object.keys(localPlannedMeals).length > 0) {
-        // Get all recipes from the database to map local recipe IDs to DB IDs
-        const { data: dbRecipes } = await supabase
-          .from('recipes')
-          .select('id, title')
-          .eq('user_id', userId);
-        
-        const recipeMap = new Map();
-        if (dbRecipes) {
-          for (const recipe of dbRecipes) {
-            recipeMap.set(recipe.title, recipe.id);
-          }
-        }
-        
-        // Add each planned meal
-        for (const [dateStr, meals] of Object.entries(localPlannedMeals)) {
-          for (const meal of meals as any[]) {
-            // Find the corresponding recipe ID in the database
-            const recipeId = recipeMap.get(meal.title);
-            
-            if (recipeId) {
-              const { error } = await supabase.from('planned_meals').insert({
-                user_id: userId,
-                recipe_id: recipeId,
-                date: dateStr,
-                time: meal.time,
-                status: meal.status || 'planned'
-              });
-              
-              if (error) {
-                console.error('Error migrating planned meal:', error);
-              }
-            }
-          }
-        }
-      }
-      
-      // Set migration flag to avoid duplicating data
-      localStorage.setItem(migrationFlagKey, 'true');
-      
-      toast({
-        title: "Data Migration Complete",
-        description: "Your local recipes and meal plans have been migrated to your account.",
-      });
-    } catch (error) {
-      console.error('Data migration error:', error);
-      toast({
-        title: "Data Migration Failed",
-        description: "Failed to migrate local data to your account.",
-        variant: "destructive",
-      });
-    }
-  };
   
   const signUp = async (email: string, password: string) => {
     try {

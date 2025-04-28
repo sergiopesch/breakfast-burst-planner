@@ -3,7 +3,7 @@ import React from 'react';
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Coffee, Check, Clock, ArrowRight } from "lucide-react";
+import { Coffee, Check, Clock, ArrowRight, Image as ImageIcon } from "lucide-react";
 import { Recipe } from '@/hooks/useMealPlanner';
 import { format } from 'date-fns';
 import { Card } from "@/components/ui/card";
@@ -30,6 +30,7 @@ const CompactMealCard: React.FC<CompactMealCardProps> = ({
   const allCompleted = completedCount > 0 && completedCount === meals.length;
   const someCompleted = completedCount > 0 && completedCount < meals.length;
   const isCompactView = view === 'month';
+  const firstRecipeWithImage = meals.find(m => m.image);
   
   const dayFormat = 'd';
   const weekdayFormat = isCompactView ? 'EEE' : 'EEEE';
@@ -46,11 +47,11 @@ const CompactMealCard: React.FC<CompactMealCardProps> = ({
         allCompleted ? "border-l-4 border-l-green-500" : 
         someCompleted ? "border-l-4 border-l-yellow-500" : 
         meals.length > 0 ? "border-l-4 border-l-[#4F2D9E]" : "",
-        "h-full"
+        "h-full flex flex-col"
       )}
     >
-      <div className={cn("p-4 flex flex-col", "h-full")}>
-        <div className="flex items-center justify-between mb-3">
+      <div className={cn("p-4", firstRecipeWithImage ? "pb-2" : "")}>
+        <div className="flex items-center justify-between mb-2">
           <div className="flex flex-col">
             <div className="flex items-baseline gap-1.5">
               <span className={cn(
@@ -89,51 +90,37 @@ const CompactMealCard: React.FC<CompactMealCardProps> = ({
           )}
         </div>
 
-        <div className="space-y-2 flex-grow">
-          {meals.length > 0 ? (
-            <div className="space-y-2">
-              {meals.slice(0, isCompactView ? 2 : 3).map((meal, index) => (
-                <div 
-                  key={index} 
-                  className={cn(
-                    "flex items-center justify-between py-1.5 px-2.5 rounded-md",
-                    "bg-gray-50/80 hover:bg-gray-100 transition-colors",
-                    meal.status === 'completed' ? "bg-green-50/80" : ""
-                  )}
-                >
-                  <div className="flex items-center gap-2 min-w-0 max-w-[70%]">
-                    <div className={cn(
-                      "w-2 h-2 rounded-full flex-shrink-0",
-                      meal.status === 'completed' ? 'bg-green-500' : 'bg-[#4F2D9E]'
-                    )}/>
-                    <p className="truncate text-sm">{meal.title}</p>
+        {meals.length > 0 && firstRecipeWithImage ? (
+          <div className="relative rounded-md overflow-hidden mt-2 mb-2">
+            <div 
+              className="w-full aspect-video bg-cover bg-center"
+              style={{ backgroundImage: `url(${firstRecipeWithImage.image})` }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent/30 flex items-end">
+                <div className="p-2 w-full">
+                  <p className="text-white text-sm font-medium truncate">{firstRecipeWithImage.title}</p>
+                  <div className="flex items-center text-xs text-white/90 mt-1">
+                    <Clock className="w-3 h-3 mr-1" />
+                    {firstRecipeWithImage.time}
                   </div>
-                  {meal.time && (
-                    <div className="flex items-center text-xs text-gray-500">
-                      <Clock className="w-3 h-3 mr-1" />
-                      {meal.time}
-                    </div>
-                  )}
                 </div>
-              ))}
-              
-              {meals.length > (isCompactView ? 2 : 3) && (
-                <p className="text-xs text-[#4F2D9E] flex items-center mt-1 justify-end">
-                  +{meals.length - (isCompactView ? 2 : 3)} more
-                  <ArrowRight className="w-3 h-3 ml-1" />
-                </p>
-              )}
+              </div>
             </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-6 text-gray-400">
-              <Coffee className={cn("mb-1", "h-5 w-5")} />
-              <span className="text-xs">Add breakfast</span>
-            </div>
-          )}
-        </div>
+            {meals.length > 1 && (
+              <div className="absolute top-2 right-2 bg-black/70 text-white text-xs font-medium rounded-full px-2 py-0.5">
+                +{meals.length - 1}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-6 text-gray-400 flex-grow">
+            <Coffee className={cn("mb-1", "h-5 w-5")} />
+            <span className="text-xs">{meals.length === 0 ? "Add breakfast" : "No image available"}</span>
+          </div>
+        )}
         
         {meals.length > 0 && !isCompactView && (
-          <div className="mt-3 pt-2 border-t border-gray-100">
+          <div className="mt-auto pt-2 border-t border-gray-100">
             <Button 
               variant="ghost" 
               size="sm" 

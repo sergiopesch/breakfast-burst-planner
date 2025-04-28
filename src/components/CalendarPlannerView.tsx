@@ -3,7 +3,7 @@ import React from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import { Recipe } from '@/hooks/useMealPlanner';
 import CompactMealCard from './CompactMealCard';
-import { format } from 'date-fns';
+import { format, isSameMonth } from 'date-fns';
 import { cn } from "@/lib/utils";
 
 interface CalendarPlannerViewProps {
@@ -40,31 +40,36 @@ const CalendarPlannerView: React.FC<CalendarPlannerViewProps> = ({
       </div>
       
       <div className={cn(
-        "grid gap-4",
+        "grid gap-3",
         view === 'week' 
-          ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7" 
-          : "grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7"
+          ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7" 
+          : "grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7"
       )}>
-        <AnimatePresence>
+        <AnimatePresence mode="wait">
           {dates.map((date) => {
             const dateKey = date.toISOString().split('T')[0];
             const isSelected = dateKey === selectedDateStr;
             const meals = getMealsForDate(date);
+            const isCurrentMonth = view === 'month' ? isSameMonth(date, selectedDate) : true;
             
             return (
               <motion.div
                 key={dateKey}
                 initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
+                animate={{ opacity: isCurrentMonth ? 1 : 0.6, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
                 layout
+                className={cn(
+                  view === 'month' && !isCurrentMonth && "opacity-60"
+                )}
               >
                 <CompactMealCard
                   date={date}
                   meals={meals}
                   onClick={() => onDateSelect(date)}
                   isSelected={isSelected}
+                  view={view}
                 />
               </motion.div>
             );

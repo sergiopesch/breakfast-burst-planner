@@ -1,94 +1,57 @@
 
-import { useAuth } from '@/hooks/useAuth';
-import { Button } from '@/components/ui/button';
-import { Coffee, LogOut, User, RefreshCw } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import { getUserName } from '@/utils/getUserName';
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useToast } from '@/hooks/use-toast';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { getUserDisplayName, getUserInitials } from "@/utils/getUserName";
+import { Link, useNavigate } from "react-router-dom";
+import MainNav from './MainNav'; // Import the MainNav component
 
 const NavBar = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
   
   const handleSignOut = async () => {
     await signOut();
-    navigate('/');
+    navigate('/login');
   };
   
-  const handleRefresh = () => {
-    toast({
-      title: "Refreshing",
-      description: "Reloading application data...",
-    });
-    
-    // Use window.location.reload() to perform a full page refresh
-    window.location.reload();
-  };
+  const userDisplayName = getUserDisplayName(user);
+  const userInitials = getUserInitials(user);
   
   return (
-    <nav className="bg-white shadow-sm p-4">
-      <div className="max-w-7xl mx-auto flex justify-between items-center">
-        <Link to="/" className="flex items-center space-x-2">
-          <Coffee className="h-6 w-6 text-[#4F2D9E]" />
-          <span className="font-medium text-xl text-[#4F2D9E]">Breakfast Planner</span>
-        </Link>
-        
-        <div className="flex items-center space-x-4">
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={handleRefresh}
-            className="text-[#4F2D9E] hover:bg-[#4F2D9E]/10"
-            title="Refresh application"
-          >
-            <RefreshCw className="h-5 w-5" />
-          </Button>
-          
-          <Link to="/planner">
-            <Button variant="ghost" className="text-[#4F2D9E] hover:bg-[#4F2D9E]/10">
-              Meal Planner
-            </Button>
+    <header className="border-b bg-white">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        <div className="flex items-center gap-6">
+          <Link to="/" className="flex items-center gap-2 font-semibold">
+            <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">
+              MealPlan
+            </span>
           </Link>
           
+          {/* Add MainNav here */}
+          {user && <MainNav />}
+        </div>
+        
+        <div className="flex items-center gap-4">
           {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="border-[#4F2D9E] text-[#4F2D9E]">
-                  <User className="h-4 w-4 mr-2" />
-                  {user.email?.split('@')[0] || getUserName()}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  className="cursor-pointer"
-                  onClick={handleSignOut}
-                >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Link to="/login">
-              <Button className="bg-[#4F2D9E] hover:bg-[#3D2277]">
-                Sign in with Google
+            <div className="flex items-center gap-4">
+              <Avatar>
+                <AvatarImage src={user.user_metadata?.avatar_url} />
+                <AvatarFallback>{userInitials}</AvatarFallback>
+              </Avatar>
+              <div className="hidden md:block">
+                <div className="text-sm font-medium">{userDisplayName}</div>
+              </div>
+              <Button variant="outline" size="sm" onClick={handleSignOut}>
+                Sign out
               </Button>
-            </Link>
+            </div>
+          ) : (
+            <Button onClick={() => navigate('/login')}>Sign in</Button>
           )}
         </div>
       </div>
-    </nav>
+    </header>
   );
 };
 

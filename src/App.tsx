@@ -8,6 +8,8 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Planner from "./pages/Planner";
+import Recipes from "./pages/Recipes"; // Add import
+import CreateRecipe from "./pages/CreateRecipe"; // Add import
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useEffect } from "react";
@@ -59,6 +61,23 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Planner />
+                </ProtectedRoute>
+              } 
+            />
+            {/* Add new routes */}
+            <Route 
+              path="/recipes" 
+              element={
+                <ProtectedRoute>
+                  <Recipes />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/create-recipe" 
+              element={
+                <ProtectedRoute>
+                  <CreateRecipe />
                 </ProtectedRoute>
               } 
             />

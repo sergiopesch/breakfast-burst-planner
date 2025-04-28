@@ -68,7 +68,8 @@ window.addEventListener('load', () => {
     if (lastLoadTime && (currentTime - parseInt(lastLoadTime, 10)) > 3600000) { // 1 hour
       console.log('Forcing a hard reload to clear cache');
       sessionStorage.setItem('lastLoadTime', currentTime.toString());
-      window.location.reload(true); // Force reload from server
+      // Use location.reload() without arguments to fix TypeScript error
+      window.location.reload();
     } else {
       sessionStorage.setItem('lastLoadTime', currentTime.toString());
     }

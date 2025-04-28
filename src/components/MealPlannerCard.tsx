@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,7 +38,7 @@ const MealPlannerCard: React.FC<MealPlannerCardProps> = ({ date, view = 'day', o
       // Generate consistent meals for each day based on the date if nothing saved
       const dayOfWeek = date.getDay();
       
-      const breakfastOptions = [
+      const breakfastOptions: Recipe[] = [
         {
           id: 101,
           time: '7:30 AM',
@@ -85,7 +84,7 @@ const MealPlannerCard: React.FC<MealPlannerCardProps> = ({ date, view = 'day', o
         selectedIndices.push((dayOfWeek + 3) % breakfastOptions.length);
       }
 
-      const generatedMeals = selectedIndices.map(index => ({
+      const generatedMeals: Recipe[] = selectedIndices.map(index => ({
         ...breakfastOptions[index],
         // Make today's meals more likely to be completed
         status: isToday(date) && Math.random() > 0.5 ? 'completed' : 'planned'
@@ -122,7 +121,7 @@ const MealPlannerCard: React.FC<MealPlannerCardProps> = ({ date, view = 'day', o
   };
 
   const addRecipe = (recipe: Recipe) => {
-    const newMeal = {
+    const newMeal: Recipe = {
       ...recipe,
       id: Date.now(), // Ensure unique id
       time: `${new Date().getHours()}:${String(new Date().getMinutes()).padStart(2, '0')} AM`,
@@ -210,7 +209,21 @@ const MealPlannerCard: React.FC<MealPlannerCardProps> = ({ date, view = 'day', o
       <motion.div
         initial="hidden"
         animate="visible"
-        variants={list}
+        variants={{
+          visible: {
+            opacity: 1,
+            transition: {
+              when: "beforeChildren",
+              staggerChildren: 0.1,
+            },
+          },
+          hidden: {
+            opacity: 0,
+            transition: {
+              when: "afterChildren",
+            },
+          },
+        }}
         className="space-y-4"
       >
         <AnimatePresence>
@@ -218,7 +231,10 @@ const MealPlannerCard: React.FC<MealPlannerCardProps> = ({ date, view = 'day', o
             meals.map((meal, index) => (
               <motion.div 
                 key={meal.id || index} 
-                variants={item} 
+                variants={{
+                  visible: { opacity: 1, y: 0 },
+                  hidden: { opacity: 0, y: 20 },
+                }} 
                 exit={{ opacity: 0, height: 0, marginBottom: 0 }}
                 layout
               >
@@ -270,7 +286,13 @@ const MealPlannerCard: React.FC<MealPlannerCardProps> = ({ date, view = 'day', o
               </motion.div>
             ))
           ) : (
-            <motion.div variants={item} className="text-center py-8">
+            <motion.div 
+              variants={{
+                visible: { opacity: 1, y: 0 },
+                hidden: { opacity: 0, y: 20 },
+              }} 
+              className="text-center py-8"
+            >
               <Coffee className="h-12 w-12 mx-auto text-gray-300 mb-3" />
               <p className="text-gray-500">No breakfast planned for this day</p>
               <Button 

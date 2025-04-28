@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { useAuth } from '@/hooks/useAuth';
 import { Link, useNavigate } from 'react-router-dom';
-import { Coffee, Loader2 } from 'lucide-react';
+import { Coffee, Loader2, AlertTriangle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Login = () => {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const { signInWithGoogle, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -23,18 +25,40 @@ const Login = () => {
   const handleGoogleSignIn = async () => {
     console.log("Google sign-in button clicked");
     setIsGoogleLoading(true);
+    setAuthError(null);
     
     try {
-      const result = await signInWithGoogle();
+      // Add a timeout to detect connection issues
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Connection to Google timed out. Please check your internet connection.")), 15000)
+      );
+      
+      // Race between the actual sign-in and the timeout
+      const result = await Promise.race([
+        signInWithGoogle(),
+        timeoutPromise
+      ]);
+      
       console.log("Sign in result:", result);
       // The user will be redirected to Google's auth page
     } catch (error: any) {
       console.error("Error in handleGoogleSignIn:", error);
-      toast({
-        title: "Google Sign In Error",
-        description: error.message || "An unexpected error occurred",
-        variant: "destructive",
-      });
+      
+      // Handle specific errors
+      let errorMessage = error.message || "An unexpected error occurred";
+      
+      if (errorMessage.includes("refused to connect") || 
+          errorMessage.includes("timed out") || 
+          error.name === "TypeError") {
+        errorMessage = "Connection to Google authentication failed. Please check your internet connection and browser security settings.";
+        setAuthError(errorMessage);
+      } else {
+        toast({
+          title: "Google Sign In Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsGoogleLoading(false);
     }
@@ -54,6 +78,13 @@ const Login = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
+            {authError && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>{authError}</AlertDescription>
+              </Alert>
+            )}
+            
             <Button 
               type="button"
               className="w-full bg-[#4F2D9E] hover:bg-[#3D2277] flex items-center justify-center"
@@ -71,8 +102,13 @@ const Login = () => {
             </Button>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-center text-sm">
-          New user? Just click the button above to sign up with Google.
+        <CardFooter className="flex flex-col space-y-3">
+          <p className="text-sm text-center">
+            New user? Just click the button above to sign up with Google.
+          </p>
+          <p className="text-xs text-gray-500 text-center">
+            If you're having trouble signing in, please ensure that your browser allows pop-ups and connections to accounts.google.com
+          </p>
         </CardFooter>
       </Card>
     </div>

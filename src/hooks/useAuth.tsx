@@ -63,6 +63,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log("Starting Google sign-in process");
       
+      // Use browser detection to add specific options
+      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -70,7 +73,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
-          }
+            // Add a parameter to potentially bypass some browser security issues
+            ...(isSafari ? { client_type: 'web_app' } : {})
+          },
         },
       });
       

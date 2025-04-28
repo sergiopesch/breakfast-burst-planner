@@ -1,73 +1,25 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, Plus, FileText, Search } from "lucide-react";
 
+import { useRecipes } from "@/hooks/useRecipes";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/lib/supabase";
-import { Recipe } from "@/hooks/useMealPlanner";
 import { useToast } from "@/hooks/use-toast";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import RecipeCard from "@/components/RecipeCard"; // Fixed import statement
+import RecipeCard from "@/components/RecipeCard";
 import NavBar from '@/components/NavBar';
 
 const Recipes = () => {
+  const { recipes, isLoading } = useRecipes();
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  
-  useEffect(() => {
-    const fetchRecipes = async () => {
-      if (!user) {
-        setIsLoading(false);
-        return;
-      }
-      
-      try {
-        const { data, error } = await supabase
-          .from('recipes')
-          .select('*')
-          .eq('user_id', user.id);
-          
-        if (error) {
-          throw error;
-        }
-        
-        // Transform the data to match Recipe type
-        const formattedRecipes: Recipe[] = data.map(recipe => ({
-          id: recipe.id,
-          title: recipe.title,
-          description: recipe.description,
-          prepTime: recipe.prep_time,
-          image: recipe.image_url,
-          image_path: recipe.image_path,
-          ingredients: recipe.ingredients,
-          instructions: recipe.instructions,
-          servings: recipe.servings
-        }));
-        
-        setRecipes(formattedRecipes);
-      } catch (error) {
-        console.error('Error fetching recipes:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load recipes.",
-          variant: "destructive"
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchRecipes();
-  }, [user, toast]);
   
   const filteredRecipes = recipes.filter(recipe => 
     recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

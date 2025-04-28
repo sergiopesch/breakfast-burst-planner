@@ -1,9 +1,10 @@
 
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import RecipeCard from '../components/RecipeCard';
 import CtaButton from '../components/CtaButton';
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Coffee, Heart } from 'lucide-react';
+import { RefreshCw, Coffee, Heart, BookOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BREAKFAST_RECIPES } from '../components/RecipeCard';
 
@@ -97,6 +98,14 @@ const Index = () => {
                   )}
                 </AnimatePresence>
               </div>
+              
+              <Link 
+                to="/recipes"
+                className="flex items-center text-sm font-medium text-[#4F2D9E] hover:underline"
+              >
+                <BookOpen className="h-4 w-4 mr-1" />
+                View all recipes
+              </Link>
             </div>
             <RecipeCard key={recipeKey} recipe={currentRecipe} />
           </motion.div>

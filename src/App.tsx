@@ -16,13 +16,25 @@ import { supabase } from "@/lib/supabase";
 const AuthCallback = () => {
   useEffect(() => {
     // This component captures the OAuth redirect and allows Supabase to handle the authentication
-    const { hash } = window.location;
-    if (hash) {
+    console.log("AuthCallback component mounted");
+    
+    const handleAuthCallback = async () => {
+      const { hash, search } = window.location;
+      console.log("Auth callback URL info:", { hash, search });
+      
       // Let Supabase handle the hash fragment (it contains the access token)
-      supabase.auth.getSession();
-    }
-    // Redirect to the planner page after authentication
-    window.location.href = "/planner";
+      const { data, error } = await supabase.auth.getSession();
+      console.log("Auth session result:", { data, error });
+      
+      if (error) {
+        console.error("Auth callback error:", error);
+      }
+      
+      // Redirect to the planner page after authentication
+      window.location.href = "/planner";
+    };
+    
+    handleAuthCallback();
   }, []);
 
   return <div className="flex justify-center items-center h-screen">Completing authentication...</div>;

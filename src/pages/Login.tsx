@@ -21,12 +21,15 @@ const Login = () => {
   }, [user, navigate]);
 
   const handleGoogleSignIn = async () => {
+    console.log("Google sign-in button clicked");
     setIsGoogleLoading(true);
     
     try {
-      await signInWithGoogle();
+      const result = await signInWithGoogle();
+      console.log("Sign in result:", result);
       // The user will be redirected to Google's auth page
     } catch (error: any) {
+      console.error("Error in handleGoogleSignIn:", error);
       toast({
         title: "Google Sign In Error",
         description: error.message || "An unexpected error occurred",

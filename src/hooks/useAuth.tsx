@@ -61,14 +61,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   
   const signInWithGoogle = async () => {
     try {
+      console.log("Starting Google sign-in process");
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         },
       });
       
       if (error) {
+        console.error("Google sign-in error:", error);
         toast({
           title: "Google Sign In Failed",
           description: error.message,
@@ -77,8 +84,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { session: null, error };
       }
       
+      console.log("Google sign-in initiated successfully", data);
       return { session: null, error: null };
     } catch (error: any) {
+      console.error("Exception during Google sign-in:", error);
       toast({
         title: "Google Sign In Failed",
         description: error.message,

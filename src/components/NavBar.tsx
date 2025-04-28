@@ -1,7 +1,7 @@
 
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { Coffee, LogOut, User } from 'lucide-react';
+import { Coffee, LogOut, User, RefreshCw } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getUserName } from '@/utils/getUserName';
 import { 
@@ -12,14 +12,26 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useToast } from '@/hooks/use-toast';
 
 const NavBar = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
+  };
+  
+  const handleRefresh = () => {
+    toast({
+      title: "Refreshing",
+      description: "Reloading application data...",
+    });
+    
+    // Use window.location.reload() to perform a full page refresh
+    window.location.reload();
   };
   
   return (
@@ -31,6 +43,16 @@ const NavBar = () => {
         </Link>
         
         <div className="flex items-center space-x-4">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={handleRefresh}
+            className="text-[#4F2D9E] hover:bg-[#4F2D9E]/10"
+            title="Refresh application"
+          >
+            <RefreshCw className="h-5 w-5" />
+          </Button>
+          
           <Link to="/planner">
             <Button variant="ghost" className="text-[#4F2D9E] hover:bg-[#4F2D9E]/10">
               Meal Planner

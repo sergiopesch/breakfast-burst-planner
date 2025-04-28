@@ -58,18 +58,11 @@ const NavBar = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <div className="flex items-center space-x-2">
-              <Link to="/login">
-                <Button variant="ghost" className="text-[#4F2D9E] hover:bg-[#4F2D9E]/10">
-                  Sign In
-                </Button>
-              </Link>
-              <Link to="/register">
-                <Button className="bg-[#4F2D9E] hover:bg-[#3D2277]">
-                  Sign Up
-                </Button>
-              </Link>
-            </div>
+            <Link to="/login">
+              <Button className="bg-[#4F2D9E] hover:bg-[#3D2277]">
+                Sign in with Google
+              </Button>
+            </Link>
           )}
         </div>
       </div>

@@ -9,7 +9,6 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Planner from "./pages/Planner";
 import Login from "./pages/Login";
-import Register from "./pages/Register";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useEffect } from "react";
 import { supabase } from "@/lib/supabase";
@@ -41,7 +40,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route path="/register" element={<Navigate to="/login" replace />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route 
               path="/planner" 

@@ -1,15 +1,18 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Heart, Clock, Coffee } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { motion } from 'framer-motion';
+import { useToast } from "@/hooks/use-toast";
 
+// Updated with appropriate images matching recipe content
 const BREAKFAST_RECIPES = [
   {
+    id: 1,
     title: "Quick Banana Oatmeal",
     description: "A healthy breakfast bowl",
     prepTime: "8 min prep",
-    image: "https://images.unsplash.com/photo-1586511925558-a4c6376fe65f?w=800&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1583833986566-1d86a9a90a08?w=800&auto=format&fit=crop&q=60",
     ingredients: [
       "1 cup quick oats",
       "1 ripe banana, sliced",
@@ -25,10 +28,11 @@ const BREAKFAST_RECIPES = [
     ]
   },
   {
+    id: 2,
     title: "Avocado Toast",
     description: "Classic breakfast favorite",
     prepTime: "5 min prep",
-    image: "https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?w=800&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1603046891744-76328f11dce7?w=800&auto=format&fit=crop&q=60",
     ingredients: [
       "2 slices whole grain bread",
       "1 ripe avocado",
@@ -44,10 +48,11 @@ const BREAKFAST_RECIPES = [
     ]
   },
   {
+    id: 3,
     title: "Berry Yogurt Parfait",
     description: "Light and refreshing start",
     prepTime: "6 min prep",
-    image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1620301568862-1cf941bb8508?w=800&auto=format&fit=crop&q=60",
     ingredients: [
       "1 cup Greek yogurt",
       "1/2 cup mixed berries",
@@ -63,10 +68,11 @@ const BREAKFAST_RECIPES = [
     ]
   },
   {
+    id: 4,
     title: "Breakfast Smoothie Bowl",
     description: "Nutrient-packed morning fuel",
     prepTime: "7 min prep",
-    image: "https://images.unsplash.com/photo-1546039907-7fa05f864c02?w=800&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1628557044797-f21a177c37ec?w=800&auto=format&fit=crop&q=60",
     ingredients: [
       "1 frozen banana",
       "1/2 cup frozen berries",
@@ -82,10 +88,11 @@ const BREAKFAST_RECIPES = [
     ]
   },
   {
+    id: 5,
     title: "Breakfast Quesadilla",
     description: "Savory morning delight",
     prepTime: "10 min prep",
-    image: "https://images.unsplash.com/photo-1600824486239-1f29ccc0a2e3?w=800&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?w=800&auto=format&fit=crop&q=60",
     ingredients: [
       "2 flour tortillas",
       "2 eggs, scrambled",
@@ -102,8 +109,48 @@ const BREAKFAST_RECIPES = [
   }
 ];
 
+export { BREAKFAST_RECIPES };
+
 const RecipeCard: React.FC = () => {
-  const recipe = BREAKFAST_RECIPES[Math.floor(Math.random() * BREAKFAST_RECIPES.length)];
+  const [recipe, setRecipe] = useState(() => BREAKFAST_RECIPES[Math.floor(Math.random() * BREAKFAST_RECIPES.length)]);
+  const [isLiked, setIsLiked] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Check if recipe is already liked
+    const likedRecipes = JSON.parse(localStorage.getItem('likedRecipes') || '[]');
+    const isAlreadyLiked = likedRecipes.some((liked: any) => liked.id === recipe.id);
+    setIsLiked(isAlreadyLiked);
+  }, [recipe]);
+
+  const handleLike = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const likedRecipes = JSON.parse(localStorage.getItem('likedRecipes') || '[]');
+    let updatedLikedRecipes;
+    
+    if (isLiked) {
+      // Remove from liked recipes
+      updatedLikedRecipes = likedRecipes.filter((liked: any) => liked.id !== recipe.id);
+      toast({
+        title: "Removed from favorites",
+        description: `${recipe.title} has been removed from your favorites`,
+        duration: 2000,
+      });
+    } else {
+      // Add to liked recipes
+      updatedLikedRecipes = [...likedRecipes, recipe];
+      toast({
+        title: "Added to favorites",
+        description: `${recipe.title} has been added to your favorites`,
+        duration: 2000,
+      });
+    }
+    
+    localStorage.setItem('likedRecipes', JSON.stringify(updatedLikedRecipes));
+    setIsLiked(!isLiked);
+  };
 
   return (
     <Dialog>
@@ -121,8 +168,11 @@ const RecipeCard: React.FC = () => {
                 className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-              <button className="absolute right-3 top-3 rounded-full bg-white/90 backdrop-blur-sm p-2 transition-transform hover:scale-110 hover:bg-[#4F2D9E] hover:text-white">
-                <Heart className="h-5 w-5" />
+              <button 
+                className={`absolute right-3 top-3 rounded-full ${isLiked ? 'bg-[#4F2D9E] text-white' : 'bg-white/90 text-[#4F2D9E]'} backdrop-blur-sm p-2 transition-transform hover:scale-110`}
+                onClick={handleLike}
+              >
+                <Heart className={`h-5 w-5 ${isLiked ? 'fill-white' : ''}`} />
               </button>
             </div>
             <div className="p-4">

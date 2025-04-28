@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Heart, Clock, Coffee, Upload, Loader2, ImageOff } from 'lucide-react';
+import { Heart, Clock, Coffee, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { motion } from 'framer-motion';
 import { useToast } from "@/hooks/use-toast";
@@ -9,14 +8,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from "@/components/ui/button";
 import { Recipe } from '@/hooks/useMealPlanner';
+import ImageLoader from './ImageLoader';
 
 // Get Supabase image URL helper with cache busting
 const getSupabaseImageUrl = (filename: string) => {
-  const cacheBuster = `?v=${Date.now()}_${Math.random().toString(36).substring(2)}`;
-  return `https://nwnrgctxzqunasquaarl.supabase.co/storage/v1/object/public/recipe-images/template/${filename}${cacheBuster}`;
+  return `https://nwnrgctxzqunasquaarl.supabase.co/storage/v1/object/public/recipe-images/template/${filename}`;
 };
 
-// Updated with Supabase-hosted images and cache busting
+// Updated with Supabase-hosted images
 const BREAKFAST_RECIPES = [
   {
     id: 1,
@@ -130,15 +129,9 @@ interface RecipeCardProps {
 const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [imageError, setImageError] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
-
-  // Reset image error state when recipe changes
-  useEffect(() => {
-    setImageError(false);
-  }, [recipe]);
 
   useEffect(() => {
     const checkIfLiked = async () => {
@@ -174,21 +167,6 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick }) => {
     
     checkIfLiked();
   }, [recipe, user]);
-
-  // Add cache busting to image URL
-  const getImageWithCacheBusting = (url: string | undefined) => {
-    if (!url) return '';
-    
-    const cacheBuster = `?v=${Date.now()}_${Math.random().toString(36).substring(2)}`;
-    return url.includes('?') 
-      ? `${url.split('?')[0]}${cacheBuster}`
-      : `${url}${cacheBuster}`;
-  };
-
-  const handleImageError = () => {
-    console.error(`Failed to load image for recipe: ${recipe.title}`);
-    setImageError(true);
-  };
 
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -257,7 +235,8 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick }) => {
               image_url: imageUrl,
               image_path: imagePath,
               ingredients: recipe.ingredients || [],
-              instructions: recipe.instructions || []
+              instructions: recipe.instructions || [],
+              servings: recipe.servings || 2
             });
           
           if (error) {
@@ -332,22 +311,12 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick }) => {
       >
         <div className="neumorphic overflow-hidden rounded-xl transition-all duration-300 hover:shadow-[8px_8px_20px_rgba(0,0,0,0.1),-8px_-8px_20px_rgba(255,255,255,0.8)] dark:hover:shadow-[8px_8px_20px_rgba(0,0,0,0.3),-8px_-8px_20px_rgba(255,255,255,0.05)]">
           <div className="relative aspect-square max-h-[240px] w-full overflow-hidden">
-            {!imageError ? (
-              <img
-                src={getImageWithCacheBusting(recipe.image)}
-                alt={recipe.title}
-                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                onError={handleImageError}
-                loading="lazy"
-              />
-            ) : (
-              <div className="h-full w-full flex items-center justify-center bg-gray-100">
-                <div className="flex flex-col items-center text-gray-400">
-                  <ImageOff className="h-10 w-10 mb-2" />
-                  <p className="text-sm">Image not available</p>
-                </div>
-              </div>
-            )}
+            <ImageLoader
+              src={recipe.image}
+              alt={recipe.title}
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              fallbackClassName="h-full w-full flex items-center justify-center bg-gray-100"
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
             <button 
               className={`absolute right-3 top-3 rounded-full ${isLiked ? 'bg-[#4F2D9E] text-white' : 'bg-white/90 text-[#4F2D9E]'} backdrop-blur-sm p-2 transition-transform hover:scale-110`}
@@ -371,7 +340,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick }) => {
               <Coffee className="h-4 w-4 mr-2" />
               {recipe.title}
             </h2>
-            <p className="mt-1 text-sm text-gray-600">{recipe.description}</p>
+            <p className="mt-1 text-sm text-gray-600 line-clamp-2">{recipe.description}</p>
           </div>
         </div>
       </motion.div>
@@ -391,14 +360,12 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick }) => {
           transition={{ duration: 0.3 }}
           className="space-y-4 p-4"
         >
-          {recipe.image && !imageError && (
+          {recipe.image && (
             <div className="rounded-lg overflow-hidden">
-              <img 
-                src={getImageWithCacheBusting(recipe.image)} 
+              <ImageLoader 
+                src={recipe.image} 
                 alt={recipe.title}
                 className="w-full h-auto"
-                onError={handleImageError}
-                loading="lazy"
               />
             </div>
           )}

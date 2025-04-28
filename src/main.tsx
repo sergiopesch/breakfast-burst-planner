@@ -10,8 +10,13 @@ const refreshResources = () => {
   // Clear browser cache for static assets
   if ('caches' in window) {
     caches.keys().then(cacheNames => {
-      cacheNames.forEach(cacheName => caches.delete(cacheName));
-      console.log('All caches cleared successfully');
+      cacheNames.forEach(cacheName => {
+        // Only clear image caches
+        if (cacheName.includes('image') || cacheName.includes('recipe')) {
+          caches.delete(cacheName);
+        }
+      });
+      console.log('Image caches cleared successfully');
     }).catch(err => {
       console.error('Failed to clear caches:', err);
     });
@@ -23,27 +28,36 @@ const refreshResources = () => {
     link.setAttribute('href', `${href}${cacheBuster}`);
   });
 
-  // Force reload of all scripts (except GPT Engineer script)
-  document.querySelectorAll('script[src]').forEach(script => {
-    const src = script.getAttribute('src')?.split('?')[0] || '';
-    if (!src.includes('gptengineer.js')) {
-      script.setAttribute('src', `${src}${cacheBuster}`);
-    }
-  });
-
   console.log('Cache busting applied to static resources');
 };
 
 // Run cache busting on initial load
 refreshResources();
 
-// Unregister service workers to prevent caching
+// Unregister service workers to prevent caching issues with images
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(registrations => {
     registrations.forEach(registration => registration.unregister());
     console.log('Service workers unregistered');
   });
 }
+
+// Add a cache-busting header to fetch requests for Supabase image URLs
+const originalFetch = window.fetch;
+window.fetch = function(input: RequestInfo | URL, init?: RequestInit) {
+  // Only add cache busting for Supabase image URLs
+  if (typeof input === 'string' && 
+      input.includes('supabase') && 
+      input.includes('recipe-images') && 
+      !input.includes('?v=')) {
+    const cacheBuster = `v=${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    input = input.includes('?') 
+      ? `${input}&${cacheBuster}` 
+      : `${input}?${cacheBuster}`;
+  }
+  
+  return originalFetch(input, init);
+};
 
 // Create the React root and render the app
 const rootElement = document.getElementById("root");
@@ -56,19 +70,22 @@ if (rootElement) {
 
 // Check if page is loaded from cache and force reload if needed
 window.addEventListener('load', () => {
-  if (performance.navigation.type === 1) {
-    // This is a refresh, refresh images but don't force reload
-    console.log('Page is being refreshed naturally');
-  } else {
-    // Store last load time in session storage
-    const lastLoadTime = sessionStorage.getItem('lastLoadTime');
-    const currentTime = Date.now();
-    
-    sessionStorage.setItem('lastLoadTime', currentTime.toString());
-    
-    if (lastLoadTime && (currentTime - parseInt(lastLoadTime, 10)) > 300000) { // 5 minutes
-      console.log('Session is old, forcing reload for fresh content');
-      window.location.reload();
+  // Add a listener for image errors that will attempt to reload the image with cache busting
+  document.addEventListener('error', (e) => {
+    const target = e.target as HTMLElement;
+    if (target.tagName === 'IMG') {
+      const img = target as HTMLImageElement;
+      const src = img.getAttribute('src');
+      
+      if (src && src.includes('supabase') && !src.includes('v=')) {
+        console.log('Image failed to load, applying cache busting:', src);
+        const cacheBuster = `v=${Date.now()}_${Math.random().toString(36).substring(7)}`;
+        const newSrc = src.includes('?') 
+          ? `${src.split('?')[0]}?${cacheBuster}` 
+          : `${src}?${cacheBuster}`;
+          
+        img.setAttribute('src', newSrc);
+      }
     }
-  }
+  }, true);
 });

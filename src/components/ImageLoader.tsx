@@ -34,11 +34,15 @@ const ImageLoader: React.FC<ImageLoaderProps> = ({
     setLoading(true);
     setError(false);
 
-    // Add cache busting
-    const cacheBuster = `?v=${Date.now()}_${Math.random().toString(36).substring(2)}`;
-    const processedSrc = src.includes('?') 
-      ? `${src.split('?')[0]}${cacheBuster}`
-      : `${src}${cacheBuster}`;
+    // Add cache busting for non-blob and non-data URLs
+    const shouldAddCacheBuster = src && !src.startsWith('blob:') && !src.startsWith('data:');
+    const cacheBuster = shouldAddCacheBuster ? 
+      `?v=${Date.now()}_${Math.random().toString(36).substring(7)}` : 
+      '';
+
+    // Clean up any existing cache busters before adding a new one
+    const baseUrl = src.includes('?') ? src.split('?')[0] : src;
+    const processedSrc = shouldAddCacheBuster ? `${baseUrl}${cacheBuster}` : src;
 
     setImageSrc(processedSrc);
   }, [src]);
@@ -55,7 +59,7 @@ const ImageLoader: React.FC<ImageLoaderProps> = ({
 
   if (error) {
     return (
-      <div className={fallbackClassName}>
+      <div className={fallbackClassName} role="img" aria-label={`${alt} image not available`}>
         {errorComponent || (
           <div className="flex flex-col items-center text-gray-400">
             <ImageOff className="h-10 w-10 mb-2" />
@@ -69,7 +73,7 @@ const ImageLoader: React.FC<ImageLoaderProps> = ({
   return (
     <>
       {loading && (
-        <div className={fallbackClassName}>
+        <div className={fallbackClassName} role="presentation">
           {loadingComponent || (
             <div className="flex flex-col items-center text-gray-400">
               <Loader2 className="h-10 w-10 animate-spin mb-2" />
@@ -85,6 +89,7 @@ const ImageLoader: React.FC<ImageLoaderProps> = ({
         onLoad={handleLoad}
         onError={handleError}
         loading="lazy"
+        crossOrigin="anonymous"
       />
     </>
   );

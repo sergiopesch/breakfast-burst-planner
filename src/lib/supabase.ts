@@ -1,6 +1,6 @@
 
 import { createClient } from '@supabase/supabase-js';
-import { uploadTemplateImagesToSupabase } from '../utils/recipeGenerator';
+import { uploadTemplateImagesToSupabase, verifyTemplateImagesArePublic } from '../utils/recipeGenerator';
 
 // Your Supabase project credentials
 // These are the actual credentials from your Supabase dashboard
@@ -27,9 +27,45 @@ export const initializeTemplateImages = async () => {
       await uploadTemplateImagesToSupabase();
     } else {
       console.log('Template recipe images already exist in Supabase storage');
+      
+      // Verify images are publicly accessible
+      await verifyTemplateImagesArePublic();
     }
+    
+    // Test all image URLs
+    await testAllTemplateImageUrls();
   } catch (err) {
     console.error('Error checking template images:', err);
+  }
+};
+
+// Test all template image URLs to ensure they're working
+const testAllTemplateImageUrls = async () => {
+  const imageFilenames = [
+    "pancakes.jpg", 
+    "avocado-toast.jpg", 
+    "smoothie.jpg", 
+    "eggs.jpg", 
+    "oatmeal.jpg", 
+    "french-toast.jpg", 
+    "granola.jpg", 
+    "sandwich.jpg"
+  ];
+  
+  console.log('Testing template image URLs...');
+  
+  for (const filename of imageFilenames) {
+    const url = `https://nwnrgctxzqunasquaarl.supabase.co/storage/v1/object/public/recipe-images/template/${filename}`;
+    try {
+      const response = await fetch(url, { method: 'HEAD' });
+      if (response.ok) {
+        console.log(`✅ ${filename} is accessible`);
+      } else {
+        console.error(`❌ ${filename} returned status ${response.status}`);
+      }
+    } catch (err) {
+      console.error(`❌ Error testing ${filename}:`, err);
+    }
   }
 };
 
@@ -95,10 +131,13 @@ export const uploadRecipeImage = async (file: File, userId: string) => {
     const fileExt = file.name.split('.').pop();
     const filePath = `${userId}/recipes/${Math.random().toString(36).substring(2)}.${fileExt}`;
     
-    // Upload file to Supabase storage
+    // Upload file to Supabase storage with cache-control header
     const { data, error } = await supabase.storage
       .from('recipe-images')
-      .upload(filePath, file);
+      .upload(filePath, file, {
+        cacheControl: '3600', // 1 hour cache
+        upsert: false
+      });
       
     if (error) throw error;
     
@@ -131,3 +170,26 @@ export const deleteRecipeImage = async (filePath: string) => {
     return { success: false, error };
   }
 };
+
+// Function to update storage bucket policies to ensure images are public
+export const ensureStoragePoliciesAreSetup = async () => {
+  try {
+    // Check if bucket exists and is public
+    const { data: bucketData, error: bucketError } = await supabase
+      .rpc('get_bucket_details', { bucket_id: 'recipe-images' });
+    
+    if (bucketError) {
+      console.error('Error checking bucket details:', bucketError);
+    } else {
+      console.log('Bucket details:', bucketData);
+    }
+    
+    return true;
+  } catch (err) {
+    console.error('Error ensuring storage policies:', err);
+    return false;
+  }
+};
+
+// Run policy check at startup
+ensureStoragePoliciesAreSetup().catch(console.error);

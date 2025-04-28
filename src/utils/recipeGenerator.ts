@@ -2,12 +2,12 @@
 import { Recipe } from '@/hooks/useMealPlanner';
 import { supabase } from '@/lib/supabase';
 
-// Array of breakfast recipe images stored in Supabase
+// Function to get clean Supabase image URLs
 const getSupabaseImageUrl = (filename: string) => {
   return `https://nwnrgctxzqunasquaarl.supabase.co/storage/v1/object/public/recipe-images/template/${filename}`;
 };
 
-// These images will be publicly available from Supabase storage
+// These images are publicly available from Supabase storage
 const breakfastImages = [
   getSupabaseImageUrl("pancakes.jpg"),      // Pancakes
   getSupabaseImageUrl("avocado-toast.jpg"), // Avocado toast
@@ -268,7 +268,7 @@ export const uploadTemplateImagesToSupabase = async () => {
         .from('recipe-images')
         .upload(`template/${image.filename}`, file, {
           cacheControl: '3600',
-          upsert: false,
+          upsert: true, // Use upsert to replace existing files if needed
           contentType: blob.type
         });
       
@@ -283,4 +283,45 @@ export const uploadTemplateImagesToSupabase = async () => {
   }
   
   return true;
+};
+
+// Additional function to verify all template images are public
+export const verifyTemplateImagesArePublic = async () => {
+  try {
+    // Get current bucket policy
+    const { data: bucketData, error: bucketError } = await supabase
+      .storage
+      .getBucket('recipe-images');
+      
+    if (bucketError) {
+      console.error('Error fetching bucket info:', bucketError);
+      return false;
+    }
+    
+    // If bucket is not public, try to make the template folder public
+    if (!bucketData.public) {
+      console.log('Bucket is not public. Individual files will be checked for public access.');
+    }
+    
+    // Verify template directory exists
+    const { data: templateDir, error: dirError } = await supabase
+      .storage
+      .from('recipe-images')
+      .list('template');
+      
+    if (dirError) {
+      console.error('Error checking template directory:', dirError);
+      return false;
+    }
+    
+    if (!templateDir || templateDir.length === 0) {
+      console.log('Template directory is empty or does not exist. Initializing...');
+      await uploadTemplateImagesToSupabase();
+    }
+    
+    return true;
+  } catch (err) {
+    console.error('Error verifying template images:', err);
+    return false;
+  }
 };

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAuth } from '@/hooks/useAuth';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Coffee, Loader2, AlertTriangle, Mail } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -28,9 +28,13 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 const Login = () => {
+  const [searchParams] = useSearchParams();
+  const initialMode = searchParams.get('mode') === 'register';
+  
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
-  const [showRegister, setShowRegister] = useState(false);
+  const [showRegister, setShowRegister] = useState(initialMode);
+  const [justRegistered, setJustRegistered] = useState(false);
   const { signInWithEmail, signUpWithEmail, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -57,13 +61,32 @@ const Login = () => {
     try {
       const { email, password } = values;
       
-      // Handle sign in or sign up based on current mode
-      const result = showRegister 
-        ? await signUpWithEmail(email, password)
-        : await signInWithEmail(email, password);
-      
-      if (result.error) {
-        setAuthError(result.error.message);
+      if (showRegister) {
+        // Handle sign up
+        const result = await signUpWithEmail(email, password);
+        
+        if (result.error) {
+          setAuthError(result.error.message);
+        } else {
+          setJustRegistered(true);
+          setShowRegister(false);
+          form.reset();
+          toast({
+            title: "Account created successfully",
+            description: "Please check your email for verification if required, then sign in.",
+          });
+        }
+      } else {
+        // Handle sign in
+        const result = await signInWithEmail(email, password);
+        
+        if (result.error) {
+          if (result.error.message.includes("Invalid login credentials")) {
+            setAuthError("Invalid email or password. If you just registered, make sure to verify your email first.");
+          } else {
+            setAuthError(result.error.message);
+          }
+        }
       }
     } catch (error: any) {
       console.error("Authentication error:", error);
@@ -94,6 +117,12 @@ const Login = () => {
             <Alert variant="destructive" className="mb-4">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>{authError}</AlertDescription>
+            </Alert>
+          )}
+          
+          {justRegistered && (
+            <Alert className="mb-4 bg-green-50 text-green-800 border-green-200">
+              <AlertDescription>Account created! Please sign in with your credentials.</AlertDescription>
             </Alert>
           )}
           
@@ -150,7 +179,12 @@ const Login = () => {
             <Button 
               variant="link" 
               className="p-0 h-auto font-semibold text-[#4F2D9E]"
-              onClick={() => setShowRegister(!showRegister)}
+              onClick={() => {
+                setShowRegister(!showRegister);
+                setJustRegistered(false);
+                setAuthError(null);
+                form.reset();
+              }}
             >
               {showRegister ? "Sign In" : "Sign Up"}
             </Button>

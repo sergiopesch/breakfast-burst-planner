@@ -74,7 +74,7 @@ const FavoriteRecipesPanel: React.FC<FavoriteRecipesPanelProps> = ({
                       <h3 className="font-medium text-[#4F2D9E]">
                         {recipe.title}
                       </h3>
-                      <p className="text-sm text-gray-600 line-clamp-1">{recipe.description}</p>
+                      
                     </div>
                     <div className="flex flex-col gap-2">
                       <Dialog>

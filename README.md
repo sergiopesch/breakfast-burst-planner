@@ -1,73 +1,70 @@
-# Welcome to your Lovable project
 
-## Project info
+# Breakfast Burst Planner
 
-**URL**: https://lovable.dev/projects/659a1919-e4c2-48c3-9d53-c54d782826d7
+A delightful breakfast planning application that helps you organize your morning meals for a great start to each day.
 
-## How can I edit this code?
+## About the App
 
-There are several ways of editing your application.
+Breakfast Burst Planner allows you to:
 
-**Use Lovable**
+- Discover new breakfast recipes with a "Surprise me" feature
+- Save your favorite breakfast recipes for easy access
+- Plan your breakfasts for the entire week with a calendar view
+- Create and manage your own custom recipes
+- View nutritional information and preparation times
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/659a1919-e4c2-48c3-9d53-c54d782826d7) and start prompting.
+## Features
 
-Changes made via Lovable will be committed automatically to this repo.
+### Recipe Discovery
+Browse through a curated collection of breakfast recipes or use the "Surprise me" feature to discover something new.
 
-**Use your preferred IDE**
+### Recipe Management
+- View detailed recipe information including ingredients, preparation time, and instructions
+- Save favorites for quick access
+- Create your own custom recipes with our easy-to-use form
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Meal Planning
+Organize your breakfast schedule with our intuitive calendar interface:
+- Assign recipes to specific days
+- Plan an entire week of breakfasts in advance
+- Easily modify your plan as needed
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### User Profiles
+- Create a personal account to save your preferences
+- Access your meal plans and favorite recipes from any device
 
-Follow these steps:
+## Technologies Used
+
+- React with TypeScript
+- Tailwind CSS for styling
+- Shadcn UI for components
+- Supabase for backend services (authentication, database)
+- React Router for navigation
+- Framer Motion for animations
+- Tanstack React Query for data fetching
+
+## Getting Started
+
+To run this project locally:
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Navigate to the project directory
+cd breakfast-burst-planner
 
-# Step 3: Install the necessary dependencies.
+# Install dependencies
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Deployment
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+This project can be easily deployed through the Lovable platform. Simply click on Share -> Publish in your Lovable project.
 
-**Use GitHub Codespaces**
+## Custom Domain
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/659a1919-e4c2-48c3-9d53-c54d782826d7) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+You can connect a custom domain to your deployed app through Lovable's Project Settings > Domains section.

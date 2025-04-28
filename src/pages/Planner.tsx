@@ -3,115 +3,77 @@ import React, { useState, useEffect } from 'react';
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar as CalendarIcon, Plus, Home, Coffee, Heart, Grid, Calendar as CalendarSquare } from "lucide-react";
+import { 
+  Calendar as CalendarIcon, 
+  Home, 
+  Coffee, 
+  Heart, 
+  Grid, 
+  Calendar as CalendarSquare,
+  ChevronLeft,
+  ChevronRight
+} from "lucide-react";
 import { Link } from "react-router-dom";
-import MealPlannerCard from '../components/MealPlannerCard';
-import FavoriteRecipes from '../components/FavoriteRecipes';
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BREAKFAST_RECIPES } from '../components/RecipeCard';
-import { format, addDays, startOfWeek, startOfMonth, eachDayOfInterval } from 'date-fns';
+import { 
+  format, 
+  addDays, 
+  startOfWeek, 
+  startOfMonth, 
+  eachDayOfInterval,
+  endOfWeek,
+  endOfMonth,
+  isSameDay,
+  addWeeks,
+  subWeeks,
+  addMonths,
+  subMonths
+} from 'date-fns';
+import { useMealPlanner, Recipe } from '@/hooks/useMealPlanner';
+import DayPlannerView from '@/components/DayPlannerView';
+import CalendarPlannerView from '@/components/CalendarPlannerView';
+import FavoriteRecipesPanel from '@/components/FavoriteRecipesPanel';
+import PlannerLayout from '@/components/PlannerLayout';
+import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
 
 type ViewType = 'day' | 'week' | 'month';
 
 const Planner = () => {
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  const [showFavorites, setShowFavorites] = useState(false);
-  const [likedRecipes, setLikedRecipes] = useState<any[]>([]);
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
+  const [date, setDate] = useState<Date>(new Date());
   const [view, setView] = useState<ViewType>('day');
+  const [showFavorites, setShowFavorites] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const { toast } = useToast();
 
-  useEffect(() => {
-    // Load liked recipes from localStorage
-    const loadLikedRecipes = () => {
-      const storedRecipes = JSON.parse(localStorage.getItem('likedRecipes') || '[]');
-      setLikedRecipes(storedRecipes);
-    };
+  // Get data from our custom hook
+  const { 
+    plannedMeals, 
+    likedRecipes, 
+    isLoading, 
+    addRecipeToPlanner,
+    toggleMealStatus,
+    removeMeal
+  } = useMealPlanner(refreshKey);
 
-    loadLikedRecipes();
-    
-    // Add event listener for storage changes
-    const handleStorageChange = () => {
-      loadLikedRecipes();
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Simulate loading data
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 600);
-    
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, [refreshKey]);
-  
-  const handleDateSelect = (selectedDate: Date | undefined) => {
-    setDate(selectedDate);
-    if (selectedDate) {
-      toast({
-        title: "Breakfast Plan",
-        description: `Viewing breakfast for ${formatDate(selectedDate)}`,
-        duration: 2000,
-      });
-    }
-  };
-
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-  };
-
-  const handleAddRecipeToPlanner = (recipe: any, date: Date) => {
-    if (!date) return;
-    
-    const dateKey = date.toISOString().split('T')[0];
-    const savedMeals = JSON.parse(localStorage.getItem('plannedMeals') || '{}');
-    
-    const newMeal = {
-      ...recipe,
-      time: `8:00 AM`,
-      status: 'planned'
-    };
-    
-    savedMeals[dateKey] = savedMeals[dateKey] ? [...savedMeals[dateKey], newMeal] : [newMeal];
-    localStorage.setItem('plannedMeals', JSON.stringify(savedMeals));
-    
-    toast({
-      title: "Recipe Added",
-      description: `${recipe.title} added to ${format(date, 'MMM d')}`,
-      duration: 2000,
-    });
-    
-    setRefreshKey(prev => prev + 1);
-  };
-
+  // Get the date range for the selected view
   const getViewDates = (): Date[] => {
-    if (!date) return [];
     if (view === 'day') return [date];
     
     if (view === 'week') {
       const weekStart = startOfWeek(date, { weekStartsOn: 1 });
       return eachDayOfInterval({ 
         start: weekStart, 
-        end: addDays(weekStart, 6) 
+        end: endOfWeek(date, { weekStartsOn: 1 }) 
       });
     }
     
     if (view === 'month') {
       const monthStart = startOfMonth(date);
-      const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
       return eachDayOfInterval({
         start: monthStart,
-        end: new Date(date.getFullYear(), date.getMonth(), daysInMonth)
+        end: endOfMonth(date)
       });
     }
     
@@ -120,53 +82,117 @@ const Planner = () => {
 
   const viewDates = getViewDates();
 
+  // Navigation functions
+  const navigate = (direction: 'prev' | 'next') => {
+    if (view === 'day') {
+      setDate(prev => direction === 'next' ? addDays(prev, 1) : addDays(prev, -1));
+    } else if (view === 'week') {
+      setDate(prev => direction === 'next' ? addWeeks(prev, 1) : subWeeks(prev, 1));
+    } else if (view === 'month') {
+      setDate(prev => direction === 'next' ? addMonths(prev, 1) : subMonths(prev, 1));
+    }
+  };
+
+  const handleDateSelect = (selectedDate: Date | undefined) => {
+    if (selectedDate) {
+      setDate(selectedDate);
+      if (view !== 'day') {
+        setView('day');
+      }
+    }
+  };
+
+  const handleViewChange = (newView: ViewType) => {
+    setView(newView);
+  };
+
+  const getMealsForDate = (date: Date): Recipe[] => {
+    const dateKey = date.toISOString().split('T')[0];
+    return plannedMeals[dateKey] || [];
+  };
+
+  const handleAddToPlanner = (recipe: Recipe) => {
+    addRecipeToPlanner(recipe, date);
+    setRefreshKey(prev => prev + 1);
+  };
+
+  const handleToggleMealStatus = (index: number) => {
+    toggleMealStatus(date, index);
+    setRefreshKey(prev => prev + 1);
+  };
+
+  const handleRemoveMeal = (index: number) => {
+    removeMeal(date, index);
+    setRefreshKey(prev => prev + 1);
+  };
+
   return (
-    <div className="min-h-screen p-6 md:p-8 max-w-6xl mx-auto bg-[#F8F5FF]">
-      <div className="space-y-8 fade-up">
-        <header className="mb-8 flex items-center justify-between">
+    <div className="min-h-screen p-4 md:p-8 max-w-7xl mx-auto bg-[#F8F5FF]">
+      <div className="space-y-8">
+        <header className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-medium mb-2 text-[#4F2D9E] flex items-center">
+            <h1 className="text-3xl md:text-4xl font-medium mb-2 text-[#4F2D9E] flex items-center">
               <Coffee className="h-8 w-8 mr-3 text-[#4F2D9E]" />
               Breakfast Planner
             </h1>
-            <p className="text-lg md:text-xl text-gray-500">
+            <p className="text-gray-500">
               Plan your morning meals with ease
             </p>
           </div>
           <Link to="/">
             <Button 
               variant="outline" 
-              className="text-[#4F2D9E] border-[#4F2D9E] hover:bg-[#4F2D9E]/10 px-8 py-6 text-xl font-medium"
-              size="lg"
+              className="text-[#4F2D9E] border-[#4F2D9E] hover:bg-[#4F2D9E]/10"
             >
-              <Home className="h-6 w-6 mr-3" />
-              Home
+              <Home className="h-5 w-5 mr-2" />
+              Back to Home
             </Button>
           </Link>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Card className="p-4 neumorphic overflow-hidden bg-gradient-to-br from-white to-[#F0EBFF] border-none">
-              <CardContent className="pt-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <CalendarIcon className="h-5 w-5 text-[#4F2D9E]" />
-                  <h2 className="text-xl font-medium text-[#4F2D9E]">
-                    {date ? formatDate(date) : 'Select a date'}
-                  </h2>
-                </div>
-                <div className="relative space-y-4">
+        <PlannerLayout
+          sidebar={
+            <div className="space-y-6">
+              <Card className="overflow-hidden bg-gradient-to-br from-white to-[#F0EBFF] border-none shadow-sm">
+                <CardContent className="p-5">
                   <div className="flex items-center justify-between mb-4">
+                    <h2 className="font-medium text-[#4F2D9E] flex items-center">
+                      <CalendarIcon className="h-5 w-5 mr-2" />
+                      Calendar
+                    </h2>
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => navigate('prev')}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                      <span className="text-sm font-medium text-[#4F2D9E]">
+                        {view === 'day' && format(date, 'MMM d, yyyy')}
+                        {view === 'week' && `Week of ${format(viewDates[0], 'MMM d')}`}
+                        {view === 'month' && format(date, 'MMMM yyyy')}
+                      </span>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => navigate('next')}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="rounded-md overflow-hidden relative">
                     <Tabs 
-                      defaultValue="day" 
+                      defaultValue={view}
+                      value={view}
+                      onValueChange={(value) => handleViewChange(value as ViewType)}
                       className="w-full"
-                      onValueChange={(value) => setView(value as ViewType)}
                     >
-                      <TabsList className="grid w-full grid-cols-3">
+                      <TabsList className="grid w-full grid-cols-3 mb-4">
                         <TabsTrigger value="day" className="flex items-center gap-1">
                           <CalendarIcon className="h-4 w-4" />
                           <span>Day</span>
@@ -181,30 +207,44 @@ const Planner = () => {
                         </TabsTrigger>
                       </TabsList>
                     </Tabs>
+                    
+                    <div className="bg-white/70 backdrop-blur-sm rounded-md overflow-hidden shadow-inner">
+                      <Calendar
+                        mode="single"
+                        selected={date}
+                        onSelect={handleDateSelect}
+                        modifiers={{
+                          hasEvents: Object.keys(plannedMeals).map(dateKey => new Date(dateKey))
+                        }}
+                        modifiersStyles={{
+                          hasEvents: {
+                            fontWeight: "bold",
+                            textDecoration: "underline",
+                            textUnderlineOffset: "4px",
+                            textDecorationColor: "#4F2D9E"
+                          }
+                        }}
+                        className="rounded-md"
+                      />
+                    </div>
                   </div>
-                  
-                  <div className="calendar-wrapper relative">
-                    <Calendar
-                      mode="single"
-                      selected={date}
-                      onSelect={handleDateSelect}
-                      className="rounded-md border bg-white/50 backdrop-blur-sm shadow-inner"
-                    />
-                    <div className="calendar-glow absolute inset-0 bg-gradient-to-br from-[#4F2D9E]/5 to-transparent rounded-md pointer-events-none"></div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between mt-4">
-                    <h3 className="font-medium text-[#4F2D9E] flex items-center">
-                      <Heart className="h-4 w-4 mr-2" />
+                </CardContent>
+              </Card>
+              
+              <Card className="overflow-hidden shadow-sm">
+                <CardContent className="p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="font-medium text-[#4F2D9E] flex items-center">
+                      <Heart className="h-5 w-5 mr-2" />
                       Favorite Recipes
-                    </h3>
+                    </h2>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setShowFavorites(!showFavorites)}
                       className="text-[#4F2D9E] border-[#4F2D9E] hover:bg-[#4F2D9E]/10"
                     >
-                      {showFavorites ? "Hide Favorites" : "Show Favorites"}
+                      {showFavorites ? "Hide" : "Show"}
                     </Button>
                   </div>
                   
@@ -217,105 +257,95 @@ const Planner = () => {
                         transition={{ duration: 0.3 }}
                         className="overflow-hidden"
                       >
-                        <FavoriteRecipes 
-                          onAddToPlanner={handleAddRecipeToPlanner} 
-                          selectedDate={date} 
+                        <FavoriteRecipesPanel 
+                          likedRecipes={likedRecipes}
+                          selectedDate={date}
+                          onAddToPlanner={handleAddToPlanner}
                         />
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          <AnimatePresence mode="wait">
-            {isLoading ? (
-              <motion.div
-                key="loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="space-y-4 h-full flex items-center justify-center"
-              >
-                <div className="animate-pulse space-y-4 w-full">
-                  <div className="h-12 bg-gray-200 rounded-md w-3/4"></div>
-                  <div className="h-32 bg-gray-200 rounded-md w-full"></div>
-                  <div className="h-32 bg-gray-200 rounded-md w-full"></div>
-                </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="content"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.4, delay: 0.1 }}
-                className="space-y-4"
-              >
-                {date && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-xl font-medium text-[#4F2D9E] flex items-center">
-                        <Coffee className="h-5 w-5 mr-2" />
-                        {view === 'day' 
-                          ? 'Planned Breakfast' 
-                          : view === 'week'
-                            ? 'Weekly Breakfast Plan'
-                            : 'Monthly Breakfast Plan'
-                        }
-                      </h2>
-                      <Button 
-                        onClick={() => {
-                          if (likedRecipes.length > 0) {
-                            setShowFavorites(true);
-                          } else {
-                            toast({
-                              title: "No Favorite Recipes",
-                              description: "Like some recipes first to add them to your plan",
-                            });
-                          }
-                        }} 
-                        className="bg-[#4F2D9E] text-white hover:bg-[#4F2D9E]/90"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Breakfast
-                      </Button>
-                    </div>
-
-                    {view === 'day' ? (
-                      <MealPlannerCard 
-                        key={`${date.toISOString()}-${refreshKey}`} 
-                        date={date} 
-                        onRecipeAdded={() => setRefreshKey(prev => prev + 1)}
-                      />
-                    ) : (
-                      <div className={`grid gap-4 ${view === 'week' ? 'grid-cols-1 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-1 md:grid-cols-3 lg:grid-cols-4'}`}>
-                        <AnimatePresence>
-                          {viewDates.map((viewDate) => (
-                            <motion.div
-                              key={viewDate.toISOString()}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -10 }}
-                              transition={{ duration: 0.3 }}
-                              onClick={() => handleDateSelect(viewDate)}
-                            >
-                              <MealPlannerCard 
-                                date={viewDate} 
-                                view={view} 
-                              />
-                            </motion.div>
-                          ))}
-                        </AnimatePresence>
-                      </div>
-                    )}
+                </CardContent>
+              </Card>
+            </div>
+          }
+          content={
+            <AnimatePresence mode="wait">
+              {isLoading ? (
+                <motion.div
+                  key="loading"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="space-y-4 h-full flex items-center justify-center"
+                >
+                  <div className="animate-pulse space-y-4 w-full">
+                    <div className="h-12 bg-gray-200 rounded-md w-3/4"></div>
+                    <div className="h-32 bg-gray-200 rounded-md w-full"></div>
+                    <div className="h-32 bg-gray-200 rounded-md w-full"></div>
                   </div>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="content"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Card className="overflow-hidden shadow-sm p-5">
+                    <AnimatePresence mode="wait">
+                      {view === 'day' && (
+                        <motion.div
+                          key="day-view"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <DayPlannerView
+                            date={date}
+                            meals={getMealsForDate(date)}
+                            onToggleMealStatus={handleToggleMealStatus}
+                            onRemoveMeal={handleRemoveMeal}
+                            onAddClick={() => {
+                              if (likedRecipes.length > 0) {
+                                setShowFavorites(true);
+                              } else {
+                                toast({
+                                  title: "No Favorite Recipes",
+                                  description: "Like some recipes first to add them to your plan",
+                                });
+                              }
+                            }}
+                          />
+                        </motion.div>
+                      )}
+                      
+                      {(view === 'week' || view === 'month') && (
+                        <motion.div
+                          key={`${view}-view`}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <CalendarPlannerView
+                            dates={viewDates}
+                            selectedDate={date}
+                            plannedMeals={plannedMeals}
+                            onDateSelect={handleDateSelect}
+                            view={view}
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </Card>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          }
+        />
       </div>
     </div>
   );

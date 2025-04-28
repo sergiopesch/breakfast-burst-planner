@@ -34,28 +34,35 @@ const ImageLoader: React.FC<ImageLoaderProps> = ({
     setLoading(true);
     setError(false);
 
-    // Add cache busting for non-blob and non-data URLs
-    const shouldAddCacheBuster = src && !src.startsWith('blob:') && !src.startsWith('data:');
-    const cacheBuster = shouldAddCacheBuster ? 
-      `?v=${Date.now()}_${Math.random().toString(36).substring(7)}` : 
-      '';
+    // Only add cache busting for Supabase URLs that don't already have it
+    const needsCacheBuster = src.includes('supabase') && 
+                            !src.startsWith('blob:') && 
+                            !src.startsWith('data:') && 
+                            !src.includes('v=');
+    
+    if (needsCacheBuster) {
+      const baseUrl = src.includes('?') ? src.split('?')[0] : src;
+      const cacheBuster = `?v=${Date.now()}`;
+      setImageSrc(`${baseUrl}${cacheBuster}`);
+    } else {
+      setImageSrc(src);
+    }
 
-    // Clean up any existing cache busters before adding a new one
-    const baseUrl = src.includes('?') ? src.split('?')[0] : src;
-    const processedSrc = shouldAddCacheBuster ? `${baseUrl}${cacheBuster}` : src;
+    // Preload the image
+    const img = new Image();
+    img.src = needsCacheBuster ? `${src.includes('?') ? src.split('?')[0] : src}?v=${Date.now()}` : src;
+    img.onload = () => setLoading(false);
+    img.onerror = () => {
+      console.error(`Failed to load image: ${src}`);
+      setError(true);
+      setLoading(false);
+    };
 
-    setImageSrc(processedSrc);
+    return () => {
+      img.onload = null;
+      img.onerror = null;
+    };
   }, [src]);
-
-  const handleLoad = () => {
-    setLoading(false);
-  };
-
-  const handleError = () => {
-    console.error(`Failed to load image: ${src}`);
-    setError(true);
-    setLoading(false);
-  };
 
   if (error) {
     return (
@@ -86,9 +93,8 @@ const ImageLoader: React.FC<ImageLoaderProps> = ({
         src={imageSrc}
         alt={alt}
         className={`${className} ${loading ? 'hidden' : ''}`}
-        onLoad={handleLoad}
-        onError={handleError}
         loading="lazy"
+        decoding="async"
         crossOrigin="anonymous"
       />
     </>

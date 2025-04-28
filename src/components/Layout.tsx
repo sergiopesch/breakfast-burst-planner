@@ -9,48 +9,40 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  // Force refresh images on first load to prevent stale images
+  // Apply cache busting only once when the layout first loads
   useEffect(() => {
-    const refreshImages = () => {
-      const images = document.querySelectorAll('img');
-      
-      // Create a more efficient intersection observer
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const img = entry.target as HTMLImageElement;
-            const src = img.getAttribute('src');
-            if (src && !src.startsWith('data:') && !src.startsWith('blob:')) {
-              // Only refresh Supabase URLs to avoid unnecessary refreshes
-              if (src.includes('supabase') && !src.includes('v=')) {
-                const timestamp = Date.now();
-                const uniqueId = Math.random().toString(36).substring(7);
-                const cacheBuster = `v=${timestamp}_${uniqueId}`;
-                
-                const newSrc = src.includes('?') 
-                  ? `${src.split('?')[0]}?${cacheBuster}`
-                  : `${src}?${cacheBuster}`;
-                
-                img.setAttribute('src', newSrc);
-              }
-            }
+    // Create a more efficient intersection observer to load images properly
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target as HTMLImageElement;
+          const src = img.getAttribute('src');
+          
+          // Only add cache busting for Supabase URLs that don't already have it
+          if (src && src.includes('supabase') && !src.includes('v=')) {
+            const baseUrl = src.includes('?') ? src.split('?')[0] : src;
+            const cacheBuster = `?v=${Date.now()}`;
+            img.setAttribute('src', `${baseUrl}${cacheBuster}`);
           }
-        });
-      }, {
-        rootMargin: '200px', // Start loading before they come into view
-        threshold: 0.1
+          
+          // Stop observing after handling the image
+          observer.unobserve(img);
+        }
       });
-      
-      images.forEach(img => observer.observe(img));
-      
-      return () => observer.disconnect();
-    };
+    }, {
+      rootMargin: '200px',
+      threshold: 0.1
+    });
     
-    // Run immediately and then after a delay to catch any late-loaded images
-    refreshImages();
-    const timeoutId = setTimeout(refreshImages, 1000);
+    // Start observing all images
+    document.querySelectorAll('img').forEach(img => {
+      if (!img.complete || img.naturalHeight === 0) {
+        observer.observe(img);
+      }
+    });
     
-    return () => clearTimeout(timeoutId);
+    // Disconnect the observer when the component unmounts
+    return () => observer.disconnect();
   }, []);
 
   return (

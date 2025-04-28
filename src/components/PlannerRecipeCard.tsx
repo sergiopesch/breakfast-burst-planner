@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Check, Coffee, Clock, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Recipe } from '@/hooks/useMealPlanner';
+import ImageLoader from './ImageLoader';
 
 interface PlannerRecipeCardProps {
   meal: Recipe;
@@ -43,9 +44,9 @@ const PlannerRecipeCard: React.FC<PlannerRecipeCardProps> = ({
               <div className="flex items-center gap-3">
                 {meal.image && (
                   <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg hidden sm:block">
-                    <img 
+                    <ImageLoader 
                       src={meal.image} 
-                      alt={meal.title} 
+                      alt={meal.title}
                       className="h-full w-full object-cover"
                     />
                   </div>

@@ -47,10 +47,31 @@ const refreshImages = () => {
   });
 };
 
-// Call refresh functions
-refreshStyles();
-refreshScripts();
-refreshImages();
+// Clear browser cache for static assets
+const clearCache = async () => {
+  if ('caches' in window) {
+    try {
+      const cacheNames = await caches.keys();
+      await Promise.all(
+        cacheNames.map(cacheName => {
+          return caches.delete(cacheName);
+        })
+      );
+      console.log('All caches cleared');
+    } catch (err) {
+      console.error('Failed to clear caches:', err);
+    }
+  }
+};
+
+// Call cache clearing and refresh functions
+clearCache().then(() => {
+  refreshStyles();
+  refreshScripts();
+  refreshImages();
+  
+  console.log('Cache busting applied to resources');
+});
 
 // Create the React root and render the app
 createRoot(document.getElementById("root")!).render(<App />);

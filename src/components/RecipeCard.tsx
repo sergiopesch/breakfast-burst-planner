@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Heart, Clock, Coffee } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -12,7 +11,7 @@ const BREAKFAST_RECIPES = [
     title: "Quick Banana Oatmeal",
     description: "A healthy breakfast bowl",
     prepTime: "8 min prep",
-    image: "https://images.unsplash.com/photo-1583833986566-1d86a9a90a08?w=800&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1611740801993-dd9d9fed43a2?w=800&auto=format&fit=crop&q=60",
     ingredients: [
       "1 cup quick oats",
       "1 ripe banana, sliced",
@@ -32,7 +31,7 @@ const BREAKFAST_RECIPES = [
     title: "Avocado Toast",
     description: "Classic breakfast favorite",
     prepTime: "5 min prep",
-    image: "https://images.unsplash.com/photo-1603046891744-76328f11dce7?w=800&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1588137378633-dea1336ce1e5?w=800&auto=format&fit=crop&q=60",
     ingredients: [
       "2 slices whole grain bread",
       "1 ripe avocado",
@@ -52,7 +51,7 @@ const BREAKFAST_RECIPES = [
     title: "Berry Yogurt Parfait",
     description: "Light and refreshing start",
     prepTime: "6 min prep",
-    image: "https://images.unsplash.com/photo-1620301568862-1cf941bb8508?w=800&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1615887351252-939222041ae3?w=800&auto=format&fit=crop&q=60",
     ingredients: [
       "1 cup Greek yogurt",
       "1/2 cup mixed berries",
@@ -92,7 +91,7 @@ const BREAKFAST_RECIPES = [
     title: "Breakfast Quesadilla",
     description: "Savory morning delight",
     prepTime: "10 min prep",
-    image: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?w=800&auto=format&fit=crop&q=60",
+    image: "https://images.unsplash.com/photo-1550507992-eb63ffee0847?w=800&auto=format&fit=crop&q=60",
     ingredients: [
       "2 flour tortillas",
       "2 eggs, scrambled",

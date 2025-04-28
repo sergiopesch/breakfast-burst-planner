@@ -37,7 +37,7 @@ export const useMealPlanner = (refreshTrigger = 0) => {
             description: "Fluffy pancakes with maple syrup and fresh berries",
             prepTime: "15 min",
             servings: 2,
-            image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80",
+            image: "https://images.unsplash.com/photo-1554520735-0a6b8b6ce8b7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80",
             ingredients: ["1 cup all-purpose flour", "2 tbsp sugar", "2 tsp baking powder", "1/2 tsp salt", "1 cup milk", "1 large egg", "2 tbsp melted butter"],
             instructions: ["Mix dry ingredients", "Whisk wet ingredients separately", "Combine mixtures until just blended", "Cook on hot griddle until bubbles form", "Flip and cook other side until golden"]
           },
@@ -47,7 +47,7 @@ export const useMealPlanner = (refreshTrigger = 0) => {
             description: "Healthy breakfast with sourdough bread and smashed avocado",
             prepTime: "10 min",
             servings: 1,
-            image: "https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80",
+            image: "https://images.unsplash.com/photo-1588137378633-dea1336ce1e5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80",
             ingredients: ["2 slices sourdough bread", "1 ripe avocado", "1/2 lemon", "Salt and pepper to taste", "Red pepper flakes", "Poached egg (optional)"],
             instructions: ["Toast bread until golden", "Mash avocado with lemon juice", "Spread on toast", "Season with salt, pepper and red pepper flakes"]
           },
@@ -57,7 +57,7 @@ export const useMealPlanner = (refreshTrigger = 0) => {
             description: "Refreshing fruit bowl with granola and fresh berries",
             prepTime: "8 min",
             servings: 1,
-            image: "https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80",
+            image: "https://images.unsplash.com/photo-1628557044797-f21a177c37ec?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80",
             ingredients: ["1 cup frozen mixed berries", "1 ripe banana", "1/2 cup Greek yogurt", "1/4 cup almond milk", "1 tbsp honey", "1/4 cup granola", "Fresh berries for topping"],
             instructions: ["Blend berries, banana, yogurt, milk and honey", "Pour into bowl", "Top with granola and fresh fruit"]
           },
@@ -67,7 +67,7 @@ export const useMealPlanner = (refreshTrigger = 0) => {
             description: "Classic breakfast with hollandaise sauce and Canadian bacon",
             prepTime: "25 min",
             servings: 2,
-            image: "https://images.unsplash.com/photo-1608039829572-78524f79c4c7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80",
+            image: "https://images.unsplash.com/photo-1525351484163-7529414344d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80",
             ingredients: ["4 English muffins", "4 large eggs", "4 slices Canadian bacon", "2 egg yolks", "1 tbsp lemon juice", "1/2 cup melted butter", "Salt and cayenne pepper"],
             instructions: ["Make hollandaise: whisk yolks with lemon juice over low heat", "Slowly add melted butter until thick", "Poach eggs for 3 minutes", "Toast muffins, heat bacon", "Layer muffins with bacon, poached eggs, and sauce"]
           },
@@ -77,7 +77,7 @@ export const useMealPlanner = (refreshTrigger = 0) => {
             description: "Easy make-ahead breakfast with chia seeds and fruit",
             prepTime: "5 min + overnight",
             servings: 1,
-            image: "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80",
+            image: "https://images.unsplash.com/photo-1611740801993-dd9d9fed43a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80",
             ingredients: ["1/2 cup rolled oats", "1/2 cup milk of choice", "1 tbsp chia seeds", "1 tbsp honey or maple syrup", "1/4 tsp vanilla extract", "Pinch of salt", "Sliced fruits for topping"],
             instructions: ["Mix all ingredients except toppings", "Place in jar with lid", "Refrigerate overnight", "Add fruits before serving"]
           }

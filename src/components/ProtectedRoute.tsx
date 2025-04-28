@@ -26,7 +26,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowAnonOn =
   const allowAnonymous = allowAnonOn.includes(currentPath);
 
   if (!user && !allowAnonymous) {
-    return <Navigate to="/login" replace />;
+    // Save the current location so we can redirect back after login
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;

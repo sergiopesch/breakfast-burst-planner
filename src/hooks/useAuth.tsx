@@ -1,7 +1,6 @@
-
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Session, User } from '@supabase/supabase-js';
+import { Session, User, Provider } from '@supabase/supabase-js';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from 'react-router-dom';
 
@@ -11,6 +10,7 @@ interface AuthContextProps {
   loading: boolean;
   signUp: (email: string, password: string) => Promise<{ user: User | null; error: any }>;
   signIn: (email: string, password: string) => Promise<{ session: Session | null; error: any }>;
+  signInWithGoogle: () => Promise<{ session: Session | null; error: any }>;
   signOut: () => Promise<{ error: any }>;
 }
 
@@ -26,7 +26,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const initializeAuth = async () => {
       setLoading(true);
       
-      // Get initial session
       const { data: { session }, error } = await supabase.auth.getSession();
       
       if (error) {
@@ -44,7 +43,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.log("User authenticated:", session.user.email);
       }
       
-      // Set up auth state change listener
       const { data: { subscription } } = supabase.auth.onAuthStateChange(
         async (_event, session) => {
           console.log("Auth state changed:", _event);
@@ -121,6 +119,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
   
+  const signInWithGoogle = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      
+      if (error) {
+        toast({
+          title: "Google Sign In Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+        return { session: null, error };
+      }
+      
+      return { session: null, error: null };
+    } catch (error: any) {
+      toast({
+        title: "Google Sign In Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+      return { session: null, error };
+    }
+  };
+  
   const signOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -156,6 +183,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     loading,
     signUp,
     signIn,
+    signInWithGoogle,
     signOut
   };
   

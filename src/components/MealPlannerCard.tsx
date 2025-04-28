@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { List, Check, Coffee, Clock, CalendarDays } from "lucide-react";
+import { List, Check, Coffee, Clock, CalendarDays, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 

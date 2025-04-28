@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw, Coffee, Heart, BookOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BREAKFAST_RECIPES } from '../components/RecipeCard';
+import { useTheme } from '../components/ThemeProvider';
 
 const Index = () => {
+  const theme = useTheme();
   const [isVisible, setIsVisible] = useState(false);
   const [recipeKey, setRecipeKey] = useState(0);
   const [favoriteCount, setFavoriteCount] = useState(0);
@@ -49,7 +51,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen p-6 md:p-8 max-w-4xl mx-auto bg-[#F8F5FF]">
+    <div className={`min-h-screen p-6 md:p-8 max-w-4xl mx-auto bg-[${theme.colors.background}]`}>
       <div className={`space-y-8 ${isVisible ? 'fade-up' : 'opacity-0'}`}>
         {/* Greeting Header */}
         <motion.header 
@@ -58,7 +60,7 @@ const Index = () => {
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-medium mb-2 text-[#4F2D9E] flex items-center">
+          <h1 className={`text-3xl md:text-4xl lg:text-5xl ${theme.fonts.heading} mb-2 text-[${theme.colors.primary}] flex items-center`}>
             <Coffee className="h-8 w-8 mr-3" />
             Good morning!
           </h1>
@@ -78,7 +80,7 @@ const Index = () => {
               <div className="flex items-center gap-4">
                 <Button
                   onClick={handleRandomize}
-                  className="flex items-center gap-2 bg-[#4F2D9E] text-white hover:bg-[#4F2D9E]/90 transition-colors"
+                  className={`flex items-center gap-2 bg-[${theme.colors.primary}] text-white hover:bg-[${theme.colors.secondary}] transition-colors`}
                 >
                   <RefreshCw className="h-4 w-4" />
                   Surprise me
@@ -92,8 +94,8 @@ const Index = () => {
                       exit={{ opacity: 0, x: -20 }}
                       className="flex items-center"
                     >
-                      <Heart className={`h-5 w-5 mr-1 fill-[#4F2D9E] text-[#4F2D9E]`} />
-                      <span className="text-sm font-medium text-[#4F2D9E]">{favoriteCount} recipe{favoriteCount !== 1 ? 's' : ''} saved</span>
+                      <Heart className={`h-5 w-5 mr-1 fill-[${theme.colors.primary}] text-[${theme.colors.primary}]`} />
+                      <span className={`text-sm font-medium text-[${theme.colors.primary}]`}>{favoriteCount} recipe{favoriteCount !== 1 ? 's' : ''} saved</span>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -101,7 +103,7 @@ const Index = () => {
               
               <Link 
                 to="/recipes"
-                className="flex items-center text-sm font-medium text-[#4F2D9E] hover:underline"
+                className={`flex items-center text-sm font-medium text-[${theme.colors.primary}] hover:underline`}
               >
                 <BookOpen className="h-4 w-4 mr-1" />
                 View all recipes
@@ -115,10 +117,10 @@ const Index = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="w-full mt-8 p-6 bg-gradient-to-br from-white to-[#F0EBFF] rounded-xl shadow-sm"
+            className={`w-full mt-8 p-6 bg-gradient-to-br from-white to-[${theme.colors.accent}] rounded-xl shadow-sm`}
           >
             <div className="space-y-4">
-              <h2 className="text-xl font-medium text-[#4F2D9E] flex items-center">
+              <h2 className={`text-xl ${theme.fonts.heading} text-[${theme.colors.primary}] flex items-center`}>
                 <Coffee className="h-5 w-5 mr-2" />
                 Plan your breakfast week
               </h2>

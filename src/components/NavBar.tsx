@@ -6,11 +6,13 @@ import { getUserDisplayName, getUserInitials } from "@/utils/getUserName";
 import { Link, useNavigate } from "react-router-dom";
 import MainNav from './MainNav';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, ChevronDown } from "lucide-react";
+import { useTheme } from "./ThemeProvider";
 
 const NavBar = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const theme = useTheme();
   
   const handleSignOut = async () => {
     await signOut();
@@ -21,11 +23,11 @@ const NavBar = () => {
   const userInitials = getUserInitials(user);
   
   return (
-    <header className="border-b bg-white">
+    <header className="border-b shadow-sm bg-white sticky top-0 z-30">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-6">
-          <Link to="/" className="flex items-center gap-2 font-semibold">
-            <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-transparent bg-clip-text">
+          <Link to="/" className="flex items-center gap-2">
+            <span className={`text-xl ${theme.fonts.heading} bg-gradient-to-r from-[${theme.colors.primary}] to-[${theme.colors.secondary}] text-transparent bg-clip-text`}>
               MealPlan
             </span>
           </Link>
@@ -38,11 +40,13 @@ const NavBar = () => {
             <div className="flex items-center gap-4">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="p-0" size="sm">
-                    <Avatar>
+                  <Button variant="ghost" className="flex items-center gap-2 px-2" size="sm">
+                    <Avatar className="h-8 w-8">
                       <AvatarImage src={user.user_metadata?.avatar_url} />
-                      <AvatarFallback>{userInitials}</AvatarFallback>
+                      <AvatarFallback className="bg-[#4F2D9E] text-white">{userInitials}</AvatarFallback>
                     </Avatar>
+                    <span className="hidden md:inline-block">{userDisplayName}</span>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
@@ -66,7 +70,12 @@ const NavBar = () => {
               </DropdownMenu>
             </div>
           ) : (
-            <Button onClick={() => navigate('/login')}>Sign in</Button>
+            <Button 
+              onClick={() => navigate('/login')}
+              className="bg-[#4F2D9E] hover:bg-[#3D1C8F] transition-colors"
+            >
+              Sign in
+            </Button>
           )}
         </div>
       </div>

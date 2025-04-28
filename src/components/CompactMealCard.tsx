@@ -3,9 +3,10 @@ import React from 'react';
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Coffee, Check } from "lucide-react";
+import { Coffee, Check, Clock } from "lucide-react";
 import { Recipe } from '@/hooks/useMealPlanner';
 import { format } from 'date-fns';
+import { Card } from "@/components/ui/card";
 
 interface CompactMealCardProps {
   date: Date;
@@ -25,58 +26,75 @@ const CompactMealCard: React.FC<CompactMealCardProps> = ({
   const someCompleted = completedCount > 0 && completedCount < meals.length;
   
   return (
-    <motion.div
-      whileHover={{ y: -5 }}
-      whileTap={{ scale: 0.98 }}
+    <Card
       onClick={onClick}
       className={cn(
-        "bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-sm cursor-pointer transition-all",
-        "hover:shadow-md border border-transparent",
+        "relative overflow-hidden cursor-pointer transition-all duration-200",
+        "hover:shadow-lg hover:-translate-y-1",
         isSelected ? "ring-2 ring-[#4F2D9E] ring-opacity-60" : "",
         allCompleted ? "border-l-4 border-l-green-500" : 
         someCompleted ? "border-l-4 border-l-yellow-500" : 
         meals.length > 0 ? "border-l-4 border-l-[#4F2D9E]" : ""
       )}
     >
-      <div className="flex items-center justify-between mb-2">
-        <span className={cn(
-          "text-sm font-medium",
-          isSelected ? "text-[#4F2D9E]" : "text-gray-700"
-        )}>
-          {format(date, 'MMM d')}
-        </span>
-        <div className="flex items-center space-x-1">
-          {meals.length > 0 && (
-            <Badge variant={isSelected ? "default" : "outline"} className={cn(
-              "text-xs",
-              isSelected ? "bg-[#4F2D9E]" : "bg-[#4F2D9E]/5 text-[#4F2D9E]"
+      <div className="p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            <span className={cn(
+              "text-sm font-medium",
+              isSelected ? "text-[#4F2D9E]" : "text-gray-700"
             )}>
-              {meals.length} meal{meals.length !== 1 ? 's' : ''}
+              {format(date, 'EEE, MMM d')}
+            </span>
+            {meals.length > 0 && (
+              <span className="text-xs text-gray-500 mt-0.5">
+                {meals.length} breakfast{meals.length !== 1 ? 's' : ''}
+              </span>
+            )}
+          </div>
+          {allCompleted && (
+            <Badge variant="success" className="h-6">
+              <Check className="w-3 h-3 mr-1" />
+              Done
             </Badge>
           )}
         </div>
+
+        <div className="space-y-2">
+          {meals.map((meal, index) => (
+            <div 
+              key={index} 
+              className={cn(
+                "flex items-center justify-between p-2 rounded-md",
+                "bg-gray-50 hover:bg-gray-100 transition-colors",
+                meal.status === 'completed' ? "bg-green-50" : ""
+              )}
+            >
+              <div className="flex items-center space-x-2 min-w-0">
+                <div className={cn(
+                  "w-2 h-2 rounded-full flex-shrink-0",
+                  meal.status === 'completed' ? 'bg-green-500' : 'bg-[#4F2D9E]'
+                )}/>
+                <p className="truncate text-sm">{meal.title}</p>
+              </div>
+              {meal.time && (
+                <div className="flex items-center text-xs text-gray-500 ml-2">
+                  <Clock className="w-3 h-3 mr-1" />
+                  {meal.time}
+                </div>
+              )}
+            </div>
+          ))}
+          
+          {meals.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-4 text-gray-400">
+              <Coffee className="h-5 w-5 mb-1" />
+              <span className="text-xs">Add breakfast</span>
+            </div>
+          )}
+        </div>
       </div>
-      <div className="space-y-2">
-        {meals.slice(0, 2).map((meal, index) => (
-          <div key={index} className="flex items-center text-sm">
-            <div className={cn(
-              "w-2 h-2 rounded-full mr-2",
-              meal.status === 'completed' ? 'bg-green-500' : 'bg-[#4F2D9E]'
-            )}></div>
-            <p className="truncate">{meal.title}</p>
-          </div>
-        ))}
-        {meals.length > 2 && (
-          <p className="text-xs text-gray-500">+{meals.length - 2} more...</p>
-        )}
-        {meals.length === 0 && (
-          <div className="flex items-center justify-center py-3">
-            <Coffee className="h-4 w-4 text-gray-300 mr-1" />
-            <span className="text-xs text-gray-400">Add breakfast</span>
-          </div>
-        )}
-      </div>
-    </motion.div>
+    </Card>
   );
 };
 

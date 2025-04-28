@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Recipe } from '@/hooks/useMealPlanner';
 import CompactMealCard from './CompactMealCard';
 import { format } from 'date-fns';
+import { cn } from "@/lib/utils";
 
 interface CalendarPlannerViewProps {
   dates: Date[];
@@ -28,19 +29,21 @@ const CalendarPlannerView: React.FC<CalendarPlannerViewProps> = ({
   };
   
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-medium text-[#4F2D9E] flex items-center">
-        {view === 'week' 
-          ? `Week of ${format(dates[0], 'MMMM d')}`
-          : `${format(dates[0], 'MMMM yyyy')}`
-        }
-      </h2>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-medium text-[#4F2D9E] flex items-center">
+          {view === 'week' 
+            ? `Week of ${format(dates[0], 'MMMM d')}`
+            : `${format(dates[0], 'MMMM yyyy')}`
+          }
+        </h2>
+      </div>
       
       <div className={cn(
         "grid gap-4",
         view === 'week' 
-          ? "grid-cols-2 md:grid-cols-4 lg:grid-cols-7" 
-          : "grid-cols-2 md:grid-cols-4 lg:grid-cols-7"
+          ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7" 
+          : "grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7"
       )}>
         <AnimatePresence>
           {dates.map((date) => {
@@ -55,6 +58,7 @@ const CalendarPlannerView: React.FC<CalendarPlannerViewProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
+                layout
               >
                 <CompactMealCard
                   date={date}
@@ -72,6 +76,3 @@ const CalendarPlannerView: React.FC<CalendarPlannerViewProps> = ({
 };
 
 export default CalendarPlannerView;
-
-// Add missing imports at the top
-import { cn } from "@/lib/utils";

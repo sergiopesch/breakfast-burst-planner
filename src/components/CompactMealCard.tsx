@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -7,6 +8,7 @@ import { Recipe } from '@/hooks/useMealPlanner';
 import { format } from 'date-fns';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+
 interface CompactMealCardProps {
   date: Date;
   meals: Recipe[];
@@ -15,6 +17,7 @@ interface CompactMealCardProps {
   isToday?: boolean;
   view?: 'week' | 'month';
 }
+
 const CompactMealCard: React.FC<CompactMealCardProps> = ({
   date,
   meals,
@@ -31,7 +34,21 @@ const CompactMealCard: React.FC<CompactMealCardProps> = ({
   const dayFormat = 'd';
   const weekdayFormat = isCompactView ? 'EEE' : 'EEEE';
   const monthFormat = 'MMM';
-  return <Card onClick={onClick} className={cn("relative overflow-hidden cursor-pointer transition-all duration-200", "hover:shadow-md hover:-translate-y-1", isSelected ? "ring-2 ring-[#4F2D9E] ring-opacity-70 shadow-md" : "", isToday ? "bg-purple-50/50" : "", allCompleted ? "border-l-4 border-l-green-500" : someCompleted ? "border-l-4 border-l-yellow-500" : meals.length > 0 ? "border-l-4 border-l-[#4F2D9E]" : "", "h-full flex flex-col")}>
+  
+  return (
+    <Card 
+      onClick={onClick} 
+      className={cn(
+        "relative overflow-hidden cursor-pointer transition-all duration-200", 
+        "hover:shadow-md hover:-translate-y-1", 
+        isSelected ? "ring-2 ring-[#4F2D9E] ring-opacity-70 shadow-md" : "", 
+        isToday ? "bg-purple-50/50" : "", 
+        allCompleted ? "border-l-4 border-l-green-500" : 
+        someCompleted ? "border-l-4 border-l-yellow-500" : 
+        meals.length > 0 ? "border-l-4 border-l-[#4F2D9E]" : "", 
+        "h-full flex flex-col"
+      )}
+    >
       <div className={cn("p-4", firstRecipeWithImage ? "pb-2" : "")}>
         <div className="flex items-center justify-between mb-2">
           <div className="flex flex-col">
@@ -48,35 +65,61 @@ const CompactMealCard: React.FC<CompactMealCardProps> = ({
             </span>
           </div>
           
-          {meals.length > 0}
+          {meals.length > 0 && (
+            <div className="flex items-center">
+              {allCompleted && (
+                <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200 text-[10px] h-5">
+                  <Check className="mr-1 h-3 w-3" /> Done
+                </Badge>
+              )}
+            </div>
+          )}
         </div>
 
-        {meals.length > 0 && firstRecipeWithImage ? <div className="relative rounded-md overflow-hidden mt-2 mb-2">
-            <div className="w-full aspect-video bg-cover bg-center" style={{
-          backgroundImage: `url(${firstRecipeWithImage.image})`
-        }}>
+        {meals.length > 0 && firstRecipeWithImage ? (
+          <div className="relative rounded-md overflow-hidden mt-2 mb-2">
+            <div 
+              className="w-full aspect-video bg-cover bg-center" 
+              style={{
+                backgroundImage: `url(${firstRecipeWithImage.image})`
+              }}
+            >
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent/30 flex items-end">
                 <div className="p-2 w-full">
-                  <p className="text-white text-sm font-medium truncate">{firstRecipeWithImage.title}</p>
+                  <p className="text-white text-sm font-medium truncate">
+                    {firstRecipeWithImage.title}
+                  </p>
                   <div className="flex items-center text-xs text-white/90 mt-1">
                     <Clock className="w-3 h-3 mr-1" />
                     {firstRecipeWithImage.time}
+                    {firstRecipeWithImage.servings && (
+                      <span className="ml-2">• {firstRecipeWithImage.servings} {firstRecipeWithImage.servings === 1 ? 'person' : 'people'}</span>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
-            {meals.length > 1 && <div className="absolute top-2 right-2 bg-black/70 text-white text-xs font-medium rounded-full px-2 py-0.5">
+            {meals.length > 1 && (
+              <div className="absolute top-2 right-2 bg-black/70 text-white text-xs font-medium rounded-full px-2 py-0.5">
                 +{meals.length - 1}
-              </div>}
-          </div> : <div className="flex flex-col items-center justify-center py-6 text-gray-400 flex-grow">
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-6 text-gray-400 flex-grow">
             <Coffee className={cn("mb-1", "h-5 w-5")} />
             <span className="text-xs">{meals.length === 0 ? "Add breakfast" : "No image available"}</span>
-          </div>}
+          </div>
+        )}
         
-        {meals.length > 0 && !isCompactView && <div className="mt-auto pt-2 border-t border-gray-100">
+        {meals.length > 0 && !isCompactView && (
+          <div className="mt-auto pt-2 border-t border-gray-100">
             
-          </div>}
+          </div>
+        )}
       </div>
-    </Card>;
+    </Card>
+  );
 };
+
 export default CompactMealCard;

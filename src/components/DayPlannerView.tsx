@@ -6,6 +6,10 @@ import { Button } from "@/components/ui/button";
 import PlannerRecipeCard from './PlannerRecipeCard';
 import { Recipe } from '@/hooks/useMealPlanner';
 import { format } from 'date-fns';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { useToast } from "@/hooks/use-toast";
 
 interface DayPlannerViewProps {
   date: Date;
@@ -13,6 +17,11 @@ interface DayPlannerViewProps {
   onToggleMealStatus: (index: number) => void;
   onRemoveMeal: (index: number) => void;
   onAddClick: () => void;
+  onGenerateRecipe: (servings: number) => void;
+}
+
+interface RecipeForm {
+  servings: number;
 }
 
 const DayPlannerView: React.FC<DayPlannerViewProps> = ({
@@ -20,8 +29,39 @@ const DayPlannerView: React.FC<DayPlannerViewProps> = ({
   meals,
   onToggleMealStatus,
   onRemoveMeal,
-  onAddClick
+  onAddClick,
+  onGenerateRecipe
 }) => {
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const { toast } = useToast();
+  
+  const form = useForm<RecipeForm>({
+    defaultValues: {
+      servings: 2
+    }
+  });
+
+  const handleAddClick = () => {
+    if (meals.length > 0) {
+      toast({
+        title: "Recipe Already Added",
+        description: "You already have a breakfast planned for this day.",
+      });
+      return;
+    }
+    setIsDialogOpen(true);
+  };
+
+  const handleSubmit = (values: RecipeForm) => {
+    onGenerateRecipe(values.servings);
+    setIsDialogOpen(false);
+    
+    toast({
+      title: "Recipe Generated",
+      description: `Breakfast recipe for ${values.servings} ${values.servings === 1 ? 'person' : 'people'} has been added.`,
+    });
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -30,7 +70,7 @@ const DayPlannerView: React.FC<DayPlannerViewProps> = ({
           {format(date, 'EEEE, MMMM d, yyyy')}
         </h2>
         <Button 
-          onClick={onAddClick} 
+          onClick={handleAddClick} 
           className="bg-[#4F2D9E] text-white hover:bg-[#4F2D9E]/90"
           size="sm"
         >
@@ -66,7 +106,7 @@ const DayPlannerView: React.FC<DayPlannerViewProps> = ({
               <Button 
                 className="bg-[#4F2D9E] text-white hover:bg-[#4F2D9E]/90"
                 size="sm"
-                onClick={onAddClick}
+                onClick={handleAddClick}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Breakfast
@@ -75,6 +115,60 @@ const DayPlannerView: React.FC<DayPlannerViewProps> = ({
           )}
         </AnimatePresence>
       </motion.div>
+      
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Breakfast Recipe</DialogTitle>
+            <DialogDescription>
+              How many people will be having breakfast?
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="servings"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Number of people</FormLabel>
+                    <FormControl>
+                      <select 
+                        className="w-full border rounded-md p-2" 
+                        {...field}
+                        onChange={(e) => field.onChange(parseInt(e.target.value))}
+                      >
+                        {[1, 2, 3, 4, 5, 6].map(num => (
+                          <option key={num} value={num}>
+                            {num} {num === 1 ? 'person' : 'people'}
+                          </option>
+                        ))}
+                      </select>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              
+              <div className="flex justify-end gap-3">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="bg-[#4F2D9E] text-white hover:bg-[#4F2D9E]/90"
+                >
+                  Generate Recipe
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

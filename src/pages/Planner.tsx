@@ -11,6 +11,7 @@ import PlannerLayout from '@/components/PlannerLayout';
 import PlannerHeader from '@/components/PlannerHeader';
 import CalendarView from '@/components/CalendarView';
 import FavoritesSection from '@/components/FavoritesSection';
+import { generateRecipe } from '@/utils/recipeGenerator';
 
 type ViewType = 'day' | 'week' | 'month';
 
@@ -52,7 +53,27 @@ const Planner = () => {
   };
 
   const handleAddToPlanner = (recipe: Recipe) => {
+    const currentMeals = getMealsForDate(date);
+    if (currentMeals.length > 0) {
+      toast({
+        title: "Recipe Already Exists",
+        description: "You already have a breakfast planned for this day. Remove it first to add a new one.",
+      });
+      return;
+    }
+    
     addRecipeToPlanner(recipe, date);
+    setRefreshKey(prev => prev + 1);
+  };
+  
+  const handleGenerateRecipe = (servings: number) => {
+    const currentMeals = getMealsForDate(date);
+    if (currentMeals.length > 0) {
+      return;
+    }
+    
+    const newRecipe = generateRecipe(servings);
+    addRecipeToPlanner(newRecipe, date);
     setRefreshKey(prev => prev + 1);
   };
 
@@ -143,6 +164,7 @@ const Planner = () => {
                                 });
                               }
                             }}
+                            onGenerateRecipe={handleGenerateRecipe}
                           />
                         </motion.div>
                       )}

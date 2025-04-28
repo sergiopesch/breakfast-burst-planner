@@ -13,6 +13,7 @@ export interface Recipe {
   instructions?: string[];
   time?: string;
   status?: 'planned' | 'completed';
+  servings?: number;
 }
 
 export const useMealPlanner = (refreshTrigger = 0) => {
@@ -33,47 +34,52 @@ export const useMealPlanner = (refreshTrigger = 0) => {
           {
             id: 1,
             title: "Classic Pancakes",
-            description: "Fluffy pancakes with maple syrup",
+            description: "Fluffy pancakes with maple syrup and fresh berries",
             prepTime: "15 min",
+            servings: 2,
             image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80",
-            ingredients: ["Flour", "Milk", "Eggs", "Sugar", "Baking powder"],
-            instructions: ["Mix dry ingredients", "Add wet ingredients", "Cook on griddle"]
+            ingredients: ["1 cup all-purpose flour", "2 tbsp sugar", "2 tsp baking powder", "1/2 tsp salt", "1 cup milk", "1 large egg", "2 tbsp melted butter"],
+            instructions: ["Mix dry ingredients", "Whisk wet ingredients separately", "Combine mixtures until just blended", "Cook on hot griddle until bubbles form", "Flip and cook other side until golden"]
           },
           {
             id: 2,
             title: "Avocado Toast",
-            description: "Healthy breakfast with sourdough bread",
+            description: "Healthy breakfast with sourdough bread and smashed avocado",
             prepTime: "10 min",
+            servings: 1,
             image: "https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80",
-            ingredients: ["Bread", "Avocado", "Salt", "Pepper", "Red pepper flakes"],
-            instructions: ["Toast bread", "Mash avocado", "Season and serve"]
+            ingredients: ["2 slices sourdough bread", "1 ripe avocado", "1/2 lemon", "Salt and pepper to taste", "Red pepper flakes", "Poached egg (optional)"],
+            instructions: ["Toast bread until golden", "Mash avocado with lemon juice", "Spread on toast", "Season with salt, pepper and red pepper flakes"]
           },
           {
             id: 3,
             title: "Berry Smoothie Bowl",
-            description: "Refreshing fruit bowl with granola",
+            description: "Refreshing fruit bowl with granola and fresh berries",
             prepTime: "8 min",
+            servings: 1,
             image: "https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80",
-            ingredients: ["Frozen berries", "Banana", "Yogurt", "Honey", "Granola"],
-            instructions: ["Blend fruits", "Pour in bowl", "Top with granola"]
+            ingredients: ["1 cup frozen mixed berries", "1 ripe banana", "1/2 cup Greek yogurt", "1/4 cup almond milk", "1 tbsp honey", "1/4 cup granola", "Fresh berries for topping"],
+            instructions: ["Blend berries, banana, yogurt, milk and honey", "Pour into bowl", "Top with granola and fresh fruit"]
           },
           {
             id: 4,
             title: "Eggs Benedict",
-            description: "Classic breakfast with hollandaise sauce",
+            description: "Classic breakfast with hollandaise sauce and Canadian bacon",
             prepTime: "25 min",
+            servings: 2,
             image: "https://images.unsplash.com/photo-1608039829572-78524f79c4c7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80",
-            ingredients: ["English muffins", "Eggs", "Ham", "Butter", "Lemon juice"],
-            instructions: ["Poach eggs", "Toast muffins", "Make hollandaise", "Assemble"]
+            ingredients: ["4 English muffins", "4 large eggs", "4 slices Canadian bacon", "2 egg yolks", "1 tbsp lemon juice", "1/2 cup melted butter", "Salt and cayenne pepper"],
+            instructions: ["Make hollandaise: whisk yolks with lemon juice over low heat", "Slowly add melted butter until thick", "Poach eggs for 3 minutes", "Toast muffins, heat bacon", "Layer muffins with bacon, poached eggs, and sauce"]
           },
           {
             id: 5,
             title: "Overnight Oats",
-            description: "Easy make-ahead breakfast",
+            description: "Easy make-ahead breakfast with chia seeds and fruit",
             prepTime: "5 min + overnight",
+            servings: 1,
             image: "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80",
-            ingredients: ["Oats", "Milk", "Chia seeds", "Honey", "Fruits"],
-            instructions: ["Mix ingredients", "Refrigerate overnight", "Top with fruits"]
+            ingredients: ["1/2 cup rolled oats", "1/2 cup milk of choice", "1 tbsp chia seeds", "1 tbsp honey or maple syrup", "1/4 tsp vanilla extract", "Pinch of salt", "Sliced fruits for topping"],
+            instructions: ["Mix all ingredients except toppings", "Place in jar with lid", "Refrigerate overnight", "Add fruits before serving"]
           }
         ];
         localStorage.setItem('likedRecipes', JSON.stringify(sampleRecipes));

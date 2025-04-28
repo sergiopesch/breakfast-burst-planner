@@ -1,3 +1,7 @@
+-- Meal Planner Database Setup
+-- This file contains SQL to set up all necessary tables and relationships
+-- for the meal planning application. It includes recipes, planned_meals,
+-- their relationship, and appropriate RLS policies.
 
 -- First, check if the recipes table exists and create if it doesn't
 DO $$

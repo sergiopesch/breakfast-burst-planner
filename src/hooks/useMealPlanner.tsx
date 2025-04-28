@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
@@ -79,46 +78,96 @@ export const useMealPlanner = (refreshTrigger = 0) => {
         
         setLikedRecipes(recipes);
         
-        const { data: dbMeals, error: mealsError } = await supabase
-          .from('planned_meals')
-          .select('*, recipes(*)')
+        // First try to use the meal_plans view for better performance
+        const { data: mealPlanData, error: mealPlanError } = await supabase
+          .from('meal_plans')
+          .select('*')
           .eq('user_id', user.id);
           
-        if (mealsError) {
-          handleSupabaseError(mealsError, toast);
-          loadFromLocalStorage();
-          return;
-        }
-        
-        const mealsByDate: Record<string, Recipe[]> = {};
-        
-        dbMeals.forEach((meal: any) => {
-          const recipe = meal.recipes;
+        // If meal_plans view doesn't exist yet, fall back to the original approach
+        if (mealPlanError && mealPlanError.code === '42P01') {
+          console.log("Meal plans view not found, using manual join");
           
-          if (!recipe) return;
-          
-          const plannedRecipe: Recipe = {
-            id: recipe.id,
-            title: recipe.title,
-            description: recipe.description,
-            prepTime: recipe.prep_time,
-            image: recipe.image_url,
-            image_path: recipe.image_path,
-            ingredients: recipe.ingredients,
-            instructions: recipe.instructions,
-            servings: recipe.servings,
-            time: meal.time,
-            status: meal.status
-          };
-          
-          if (!mealsByDate[meal.date]) {
-            mealsByDate[meal.date] = [];
+          const { data: dbMeals, error: mealsError } = await supabase
+            .from('planned_meals')
+            .select('*, recipe_id')
+            .eq('user_id', user.id);
+            
+          if (mealsError) {
+            handleSupabaseError(mealsError, toast);
+            loadFromLocalStorage();
+            return;
           }
           
-          mealsByDate[meal.date].push(plannedRecipe);
-        });
-        
-        setPlannedMeals(mealsByDate);
+          // Process meals without the join
+          const mealsByDate: Record<string, Recipe[]> = {};
+          
+          for (const meal of dbMeals) {
+            const { data: recipe, error: recipeError } = await supabase
+              .from('recipes')
+              .select('*')
+              .eq('id', meal.recipe_id)
+              .single();
+              
+            if (recipeError) {
+              console.error('Error fetching recipe:', recipeError);
+              continue;
+            }
+            
+            const plannedRecipe: Recipe = {
+              id: recipe.id,
+              title: recipe.title,
+              description: recipe.description,
+              prepTime: recipe.prep_time,
+              image: recipe.image_url,
+              image_path: recipe.image_path,
+              ingredients: recipe.ingredients,
+              instructions: recipe.instructions,
+              servings: recipe.servings,
+              time: meal.time,
+              status: meal.status
+            };
+            
+            if (!mealsByDate[meal.date]) {
+              mealsByDate[meal.date] = [];
+            }
+            
+            mealsByDate[meal.date].push(plannedRecipe);
+          }
+          
+          setPlannedMeals(mealsByDate);
+        } else if (mealPlanError) {
+          // Handle other errors
+          handleSupabaseError(mealPlanError, toast);
+          loadFromLocalStorage();
+          return;
+        } else {
+          // Process data from meal_plans view
+          const mealsByDate: Record<string, Recipe[]> = {};
+          
+          mealPlanData.forEach((meal: any) => {
+            const plannedRecipe: Recipe = {
+              id: meal.recipe_id,
+              title: meal.title,
+              description: meal.description,
+              prepTime: meal.prep_time,
+              image: meal.image_url,
+              ingredients: meal.ingredients,
+              instructions: meal.instructions,
+              servings: meal.servings,
+              time: meal.time,
+              status: meal.status
+            };
+            
+            if (!mealsByDate[meal.date]) {
+              mealsByDate[meal.date] = [];
+            }
+            
+            mealsByDate[meal.date].push(plannedRecipe);
+          });
+          
+          setPlannedMeals(mealsByDate);
+        }
       } catch (error) {
         console.error('Error loading data from Supabase:', error);
         loadFromLocalStorage();

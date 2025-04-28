@@ -27,7 +27,7 @@ const DayPlannerView: React.FC<DayPlannerViewProps> = ({
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-medium text-[#4F2D9E] flex items-center">
           <Coffee className="h-5 w-5 mr-2" />
-          {format(date, 'EEEE, MMMM d')}
+          {format(date, 'EEEE, MMMM d, yyyy')}
         </h2>
         <Button 
           onClick={onAddClick} 

@@ -33,14 +33,14 @@ const CalendarPlannerView: React.FC<CalendarPlannerViewProps> = ({
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-medium text-[#4F2D9E] flex items-center">
           {view === 'week' 
-            ? `Week of ${format(dates[0], 'MMMM d')}`
+            ? `Week of ${format(dates[0], 'MMMM d, yyyy')}`
             : `${format(dates[0], 'MMMM yyyy')}`
           }
         </h2>
       </div>
       
       <div className={cn(
-        "grid gap-3",
+        "grid gap-4",
         view === 'week' 
           ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7" 
           : "grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7"

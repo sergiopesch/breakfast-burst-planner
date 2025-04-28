@@ -31,8 +31,8 @@ const CompactMealCard: React.FC<CompactMealCardProps> = ({
   const someCompleted = completedCount > 0 && completedCount < meals.length;
   const isCompactView = view === 'month';
   
-  const dayFormat = view === 'month' ? 'd' : 'd';
-  const weekdayFormat = view === 'month' ? 'EEE' : 'EEEE';
+  const dayFormat = 'd';
+  const weekdayFormat = isCompactView ? 'EEE' : 'EEEE';
   const monthFormat = 'MMM';
   
   return (
@@ -41,7 +41,7 @@ const CompactMealCard: React.FC<CompactMealCardProps> = ({
       className={cn(
         "relative overflow-hidden cursor-pointer transition-all duration-200",
         "hover:shadow-md hover:-translate-y-1",
-        isSelected ? "ring-2 ring-[#4F2D9E] ring-opacity-70" : "",
+        isSelected ? "ring-2 ring-[#4F2D9E] ring-opacity-70 shadow-md" : "",
         isToday ? "bg-purple-50/50" : "",
         allCompleted ? "border-l-4 border-l-green-500" : 
         someCompleted ? "border-l-4 border-l-yellow-500" : 
@@ -54,7 +54,7 @@ const CompactMealCard: React.FC<CompactMealCardProps> = ({
           <div className="flex flex-col">
             <div className="flex items-baseline gap-1.5">
               <span className={cn(
-                "font-medium text-lg",
+                "font-medium text-xl",
                 isToday ? "text-[#4F2D9E]" : "text-gray-800"
               )}>
                 {format(date, dayFormat)}
@@ -78,13 +78,13 @@ const CompactMealCard: React.FC<CompactMealCardProps> = ({
             <Badge 
               variant="outline" 
               className={cn(
-                "h-5 px-1.5 text-xs font-medium rounded-full",
+                "h-5 px-2 text-xs font-medium rounded-full",
                 allCompleted ? "border-green-500 text-green-600 bg-green-50" :
                 "border-[#4F2D9E] text-[#4F2D9E] bg-[#4F2D9E]/5"
               )}
             >
               {allCompleted && <Check className="w-3 h-3 mr-0.5" />}
-              {meals.length} {meals.length === 1 ? 'breakfast' : 'breakfasts'}
+              {meals.length} {meals.length === 1 ? 'meal' : 'meals'}
             </Badge>
           )}
         </div>
@@ -96,7 +96,7 @@ const CompactMealCard: React.FC<CompactMealCardProps> = ({
                 <div 
                   key={index} 
                   className={cn(
-                    "flex items-center justify-between py-1.5 px-2 rounded-md",
+                    "flex items-center justify-between py-1.5 px-2.5 rounded-md",
                     "bg-gray-50/80 hover:bg-gray-100 transition-colors",
                     meal.status === 'completed' ? "bg-green-50/80" : ""
                   )}

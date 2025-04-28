@@ -28,7 +28,7 @@ const PlannerLayout: React.FC<PlannerLayoutProps> = ({
   return (
     <div className={cn(
       "grid relative transition-all duration-300",
-      isSidebarOpen ? "grid-cols-1 lg:grid-cols-[320px_1fr]" : "grid-cols-1",
+      isSidebarOpen ? "grid-cols-1 lg:grid-cols-[340px_1fr]" : "grid-cols-1",
       "gap-4 md:gap-6",
       className
     )}>
@@ -36,25 +36,25 @@ const PlannerLayout: React.FC<PlannerLayoutProps> = ({
         variant="ghost"
         size="sm"
         className={cn(
-          "fixed top-20 z-20 h-8 rounded-full bg-white/80 backdrop-blur-sm border shadow-sm lg:hidden",
+          "fixed top-20 z-20 h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm border shadow-sm lg:hidden",
           isSidebarOpen ? "left-[300px]" : "left-4"
         )}
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
       >
-        {isSidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+        {isSidebarOpen ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
       </Button>
       
       <AnimatePresence mode="wait">
         {isSidebarOpen && (
           <motion.div 
-            className="lg:static fixed inset-y-0 left-0 z-10 w-[320px] lg:w-full"
+            className="lg:static fixed inset-y-0 left-0 z-10 w-[340px] lg:w-full"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <Card className="sticky top-4 h-[calc(100vh-2rem)] overflow-auto mx-4 bg-white/95 backdrop-blur-sm shadow-sm">
-              <div className="p-4 space-y-6">
+            <Card className="sticky top-4 h-[calc(100vh-2rem)] overflow-auto mx-4 bg-white/95 backdrop-blur-sm shadow-md border border-purple-100">
+              <div className="p-5 space-y-6">
                 {sidebar}
               </div>
             </Card>
@@ -74,7 +74,7 @@ const PlannerLayout: React.FC<PlannerLayoutProps> = ({
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           >
             {isSidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-            {isSidebarOpen ? "Hide calendar" : "Show calendar"}
+            {isSidebarOpen ? "Hide sidebar" : "Show sidebar"}
           </Button>
         </div>
         {content}

@@ -5,14 +5,17 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Fallback to direct values if environment variables are not set
-// You'll need to replace these with your actual Supabase project values
-const fallbackUrl = 'https://your-supabase-project-url.supabase.co';
-const fallbackKey = 'your-supabase-anon-key';
+// Your Supabase project credentials
+// Replace these with your actual Supabase project URL and anon key from your Supabase dashboard
+const projectUrl = 'https://your-actual-project-url.supabase.co';
+const projectAnonKey = 'your-actual-anon-key';
 
-// Use environment variables if available, otherwise use fallbacks
-const url = supabaseUrl || fallbackUrl;
-const key = supabaseAnonKey || fallbackKey;
+// Use environment variables if available, otherwise use direct project credentials
+const url = supabaseUrl || projectUrl;
+const key = supabaseAnonKey || projectAnonKey;
+
+console.log('Supabase URL:', url);
+console.log('Using environment variables:', !!supabaseUrl);
 
 export const supabase = createClient(url, key);
 

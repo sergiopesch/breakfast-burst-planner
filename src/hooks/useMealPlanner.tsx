@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
+import { supabase, handleSupabaseError } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface Recipe {
-  id: number;
+  id: number | string;
   title: string;
   description: string;
   prepTime?: string;
@@ -21,10 +24,98 @@ export const useMealPlanner = (refreshTrigger = 0) => {
   const [isLoading, setIsLoading] = useState(true);
   const [forceCacheRefresh, setForceCacheRefresh] = useState(Date.now()); // Cache busting state
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
-    // Load liked recipes and planned meals from localStorage
-    const loadStoredData = () => {
+    const loadData = async () => {
+      setIsLoading(true);
+      
+      if (!user) {
+        // If user is not authenticated, fall back to localStorage
+        loadFromLocalStorage();
+        return;
+      }
+      
+      try {
+        // Load liked recipes from Supabase
+        const { data: dbRecipes, error: recipesError } = await supabase
+          .from('recipes')
+          .select('*')
+          .eq('user_id', user.id);
+          
+        if (recipesError) {
+          handleSupabaseError(recipesError, toast);
+          // Fall back to localStorage if Supabase fails
+          loadFromLocalStorage();
+          return;
+        }
+        
+        // Map database recipes to our Recipe interface
+        const recipes: Recipe[] = dbRecipes.map((dbRecipe: any) => ({
+          id: dbRecipe.id,
+          title: dbRecipe.title,
+          description: dbRecipe.description,
+          prepTime: dbRecipe.prep_time,
+          image: dbRecipe.image_url,
+          ingredients: dbRecipe.ingredients,
+          instructions: dbRecipe.instructions,
+          servings: dbRecipe.servings,
+        }));
+        
+        setLikedRecipes(recipes);
+        
+        // Load planned meals from Supabase
+        const { data: dbMeals, error: mealsError } = await supabase
+          .from('planned_meals')
+          .select('*, recipes(*)')
+          .eq('user_id', user.id);
+          
+        if (mealsError) {
+          handleSupabaseError(mealsError, toast);
+          // Fall back to localStorage if Supabase fails
+          loadFromLocalStorage();
+          return;
+        }
+        
+        // Group meals by date
+        const mealsByDate: Record<string, Recipe[]> = {};
+        
+        dbMeals.forEach((meal: any) => {
+          const recipe = meal.recipes;
+          
+          if (!recipe) return;
+          
+          const plannedRecipe: Recipe = {
+            id: recipe.id,
+            title: recipe.title,
+            description: recipe.description,
+            prepTime: recipe.prep_time,
+            image: recipe.image_url,
+            ingredients: recipe.ingredients,
+            instructions: recipe.instructions,
+            servings: recipe.servings,
+            time: meal.time,
+            status: meal.status
+          };
+          
+          if (!mealsByDate[meal.date]) {
+            mealsByDate[meal.date] = [];
+          }
+          
+          mealsByDate[meal.date].push(plannedRecipe);
+        });
+        
+        setPlannedMeals(mealsByDate);
+      } catch (error) {
+        console.error('Error loading data from Supabase:', error);
+        // Fall back to localStorage if Supabase fails
+        loadFromLocalStorage();
+      } finally {
+        setTimeout(() => setIsLoading(false), 400); // Maintain consistent loading feel
+      }
+    };
+    
+    const loadFromLocalStorage = () => {
       // Clear cache on each load
       localStorage.removeItem('cache-timestamp');
       localStorage.setItem('cache-timestamp', Date.now().toString());
@@ -51,7 +142,7 @@ export const useMealPlanner = (refreshTrigger = 0) => {
             description: "Healthy breakfast with sourdough bread and smashed avocado",
             prepTime: "10 min",
             servings: 1,
-            image: "https://images.unsplash.com/photo-1588137378633-dea1336ce1e5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80",
+            image: "https://images.unsplash.com/photo-1588137378633-dea1336ce8b7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80",
             ingredients: ["2 slices sourdough bread", "1 ripe avocado", "1/2 lemon", "Salt and pepper to taste", "Red pepper flakes", "Poached egg (optional)"],
             instructions: ["Toast bread until golden", "Mash avocado with lemon juice", "Spread on toast", "Season with salt, pepper and red pepper flakes"]
           },
@@ -86,6 +177,7 @@ export const useMealPlanner = (refreshTrigger = 0) => {
             instructions: ["Mix all ingredients except toppings", "Place in jar with lid", "Refrigerate overnight", "Add fruits before serving"]
           }
         ];
+        
         localStorage.setItem('likedRecipes', JSON.stringify(sampleRecipes));
         setLikedRecipes(sampleRecipes);
       } else {
@@ -96,23 +188,16 @@ export const useMealPlanner = (refreshTrigger = 0) => {
         setPlannedMeals(JSON.parse(storedMeals));
       }
     };
-
-    loadStoredData();
     
-    // Simulate loading data
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 400);
-    
-    return () => clearTimeout(timer);
-  }, [refreshTrigger, forceCacheRefresh]);
+    loadData();
+  }, [user, refreshTrigger, forceCacheRefresh, toast]);
 
   // Force a refresh of the data
   const forceRefresh = () => {
     setForceCacheRefresh(Date.now());
   };
 
-  const addRecipeToPlanner = (recipe: Recipe, date: Date) => {
+  const addRecipeToPlanner = async (recipe: Recipe, date: Date) => {
     if (!date) return;
     
     const dateKey = date.toISOString().split('T')[0];
@@ -123,46 +208,213 @@ export const useMealPlanner = (refreshTrigger = 0) => {
       status: 'planned'
     };
     
-    setPlannedMeals(prev => {
-      const updated = { ...prev };
-      updated[dateKey] = updated[dateKey] ? [...updated[dateKey], newMeal] : [newMeal];
+    if (user) {
+      try {
+        // Find the recipe ID in the database or create a new one
+        const recipeId = typeof recipe.id === 'number' ? 
+          await ensureRecipeExists(recipe) : recipe.id;
+        
+        // Add the planned meal to the database
+        const { error } = await supabase.from('planned_meals').insert({
+          id: uuidv4(),
+          user_id: user.id,
+          recipe_id: recipeId,
+          date: dateKey,
+          time: newMeal.time,
+          status: 'planned'
+        });
+        
+        if (error) {
+          handleSupabaseError(error, toast);
+          return;
+        }
+        
+        // Update local state
+        setPlannedMeals(prev => {
+          const updated = { ...prev };
+          updated[dateKey] = updated[dateKey] ? [...updated[dateKey], newMeal] : [newMeal];
+          return updated;
+        });
+        
+        toast({
+          title: "Recipe Added",
+          description: `${recipe.title} added to ${format(date, 'MMM d')}`,
+          duration: 2000,
+        });
+      } catch (error) {
+        console.error('Error adding recipe to planner:', error);
+        toast({
+          title: "Failed to Add Recipe",
+          description: "There was an error adding this recipe to your plan.",
+          variant: "destructive"
+        });
+      }
+    } else {
+      // Fallback to localStorage if no user is authenticated
+      setPlannedMeals(prev => {
+        const updated = { ...prev };
+        updated[dateKey] = updated[dateKey] ? [...updated[dateKey], newMeal] : [newMeal];
+        
+        // Save to localStorage
+        localStorage.setItem('plannedMeals', JSON.stringify(updated));
+        
+        return updated;
+      });
       
-      // Save to localStorage
-      localStorage.setItem('plannedMeals', JSON.stringify(updated));
-      
-      return updated;
-    });
+      toast({
+        title: "Recipe Added",
+        description: `${recipe.title} added to ${format(date, 'MMM d')}`,
+        duration: 2000,
+      });
+    }
+  };
+  
+  // Helper function to ensure a recipe exists in the database
+  const ensureRecipeExists = async (recipe: Recipe): Promise<string> => {
+    // Check if the recipe already exists for this user by title
+    const { data, error } = await supabase
+      .from('recipes')
+      .select('id')
+      .eq('user_id', user!.id)
+      .eq('title', recipe.title)
+      .single();
     
-    toast({
-      title: "Recipe Added",
-      description: `${recipe.title} added to ${format(date, 'MMM d')}`,
-      duration: 2000,
-    });
+    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+      handleSupabaseError(error, toast);
+      throw error;
+    }
+    
+    // If the recipe exists, return its ID
+    if (data) {
+      return data.id;
+    }
+    
+    // Otherwise create a new recipe
+    const { data: newRecipe, error: insertError } = await supabase
+      .from('recipes')
+      .insert({
+        id: uuidv4(),
+        user_id: user!.id,
+        title: recipe.title,
+        description: recipe.description,
+        prep_time: recipe.prepTime,
+        image_url: recipe.image,
+        ingredients: recipe.ingredients,
+        instructions: recipe.instructions,
+        servings: recipe.servings,
+      })
+      .select('id')
+      .single();
+    
+    if (insertError) {
+      handleSupabaseError(insertError, toast);
+      throw insertError;
+    }
+    
+    return newRecipe.id;
   };
 
-  const toggleMealStatus = (date: Date, mealIndex: number) => {
+  const toggleMealStatus = async (date: Date, mealIndex: number) => {
     const dateKey = date.toISOString().split('T')[0];
     
+    if (!plannedMeals[dateKey] || !plannedMeals[dateKey][mealIndex]) {
+      return;
+    }
+    
+    const meal = plannedMeals[dateKey][mealIndex];
+    const newStatus = meal.status === 'completed' ? 'planned' : 'completed';
+    
+    if (user) {
+      try {
+        // Find the meal in the database
+        const { data, error: fetchError } = await supabase
+          .from('planned_meals')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('date', dateKey)
+          .eq('recipe_id', meal.id);
+        
+        if (fetchError) {
+          handleSupabaseError(fetchError, toast);
+          return;
+        }
+        
+        if (data && data.length > 0) {
+          // Update the meal status
+          const { error: updateError } = await supabase
+            .from('planned_meals')
+            .update({ status: newStatus })
+            .eq('id', data[0].id);
+          
+          if (updateError) {
+            handleSupabaseError(updateError, toast);
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Error toggling meal status:', error);
+        toast({
+          title: "Failed to Update Status",
+          description: "There was an error updating the meal status.",
+          variant: "destructive"
+        });
+      }
+    }
+    
+    // Update local state
     setPlannedMeals(prev => {
       const updated = { ...prev };
       
       if (updated[dateKey] && updated[dateKey][mealIndex]) {
-        const newStatus = updated[dateKey][mealIndex].status === 'completed' ? 'planned' : 'completed';
         updated[dateKey][mealIndex] = {
           ...updated[dateKey][mealIndex],
           status: newStatus
         };
         
-        localStorage.setItem('plannedMeals', JSON.stringify(updated));
+        if (!user) {
+          // Only save to localStorage if not using Supabase
+          localStorage.setItem('plannedMeals', JSON.stringify(updated));
+        }
       }
       
       return updated;
     });
   };
 
-  const removeMeal = (date: Date, mealIndex: number) => {
+  const removeMeal = async (date: Date, mealIndex: number) => {
     const dateKey = date.toISOString().split('T')[0];
     
+    if (!plannedMeals[dateKey] || !plannedMeals[dateKey][mealIndex]) {
+      return;
+    }
+    
+    const meal = plannedMeals[dateKey][mealIndex];
+    
+    if (user) {
+      try {
+        // Find and delete the meal from the database
+        const { error } = await supabase
+          .from('planned_meals')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('date', dateKey)
+          .eq('recipe_id', meal.id);
+        
+        if (error) {
+          handleSupabaseError(error, toast);
+          return;
+        }
+      } catch (error) {
+        console.error('Error removing meal:', error);
+        toast({
+          title: "Failed to Remove Meal",
+          description: "There was an error removing this meal from your plan.",
+          variant: "destructive"
+        });
+      }
+    }
+    
+    // Update local state
     setPlannedMeals(prev => {
       const updated = { ...prev };
       
@@ -172,7 +424,10 @@ export const useMealPlanner = (refreshTrigger = 0) => {
           delete updated[dateKey];
         }
         
-        localStorage.setItem('plannedMeals', JSON.stringify(updated));
+        if (!user) {
+          // Only save to localStorage if not using Supabase
+          localStorage.setItem('plannedMeals', JSON.stringify(updated));
+        }
       }
       
       return updated;

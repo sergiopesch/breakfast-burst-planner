@@ -12,6 +12,7 @@ import PlannerHeader from '@/components/PlannerHeader';
 import CalendarView from '@/components/CalendarView';
 import FavoritesSection from '@/components/FavoritesSection';
 import { generateRecipe } from '@/utils/recipeGenerator';
+import NavBar from '@/components/NavBar';
 
 type ViewType = 'day' | 'week' | 'month';
 
@@ -88,111 +89,114 @@ const Planner = () => {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-8 max-w-7xl mx-auto bg-[#F8F5FF]">
-      <div className="space-y-8">
-        <PlannerHeader 
-          title="Breakfast Planner" 
-          subtitle="Plan your morning meals with ease" 
-        />
+    <div className="min-h-screen bg-[#F8F5FF]">
+      <NavBar />
+      <div className="p-4 md:p-8 max-w-7xl mx-auto">
+        <div className="space-y-8">
+          <PlannerHeader 
+            title="Breakfast Planner" 
+            subtitle="Plan your morning meals with ease" 
+          />
 
-        <PlannerLayout
-          sidebar={
-            <div className="space-y-6">
-              <CalendarView 
-                date={date}
-                view={view}
-                plannedMeals={plannedMeals}
-                onDateSelect={handleDateSelect}
-                onViewChange={handleViewChange}
-              />
-              
-              <FavoritesSection 
-                showFavorites={showFavorites}
-                setShowFavorites={setShowFavorites}
-                likedRecipes={likedRecipes}
-                selectedDate={date}
-                onAddToPlanner={handleAddToPlanner}
-              />
-            </div>
-          }
-          content={
-            <AnimatePresence mode="wait">
-              {isLoading ? (
-                <motion.div
-                  key="loading"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="space-y-4 h-full flex items-center justify-center"
-                >
-                  <div className="animate-pulse space-y-4 w-full">
-                    <div className="h-12 bg-gray-200 rounded-md w-3/4"></div>
-                    <div className="h-32 bg-gray-200 rounded-md w-full"></div>
-                    <div className="h-32 bg-gray-200 rounded-md w-full"></div>
-                  </div>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="content"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <Card className="overflow-hidden shadow-md p-6 border border-purple-100">
-                    <AnimatePresence mode="wait">
-                      {view === 'day' && (
-                        <motion.div
-                          key="day-view"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <DayPlannerView
-                            date={date}
-                            meals={getMealsForDate(date)}
-                            onToggleMealStatus={handleToggleMealStatus}
-                            onRemoveMeal={handleRemoveMeal}
-                            onAddClick={() => {
-                              if (likedRecipes.length > 0) {
-                                setShowFavorites(true);
-                              } else {
-                                toast({
-                                  title: "No Favorite Recipes",
-                                  description: "Like some recipes first to add them to your plan",
-                                });
-                              }
-                            }}
-                            onGenerateRecipe={handleGenerateRecipe}
-                          />
-                        </motion.div>
-                      )}
-                      
-                      {(view === 'week' || view === 'month') && (
-                        <motion.div
-                          key={`${view}-view`}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <CalendarPlannerView
-                            dates={viewDates}
-                            selectedDate={date}
-                            plannedMeals={plannedMeals}
-                            onDateSelect={handleDateSelect}
-                            view={view}
-                          />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </Card>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          }
-        />
+          <PlannerLayout
+            sidebar={
+              <div className="space-y-6">
+                <CalendarView 
+                  date={date}
+                  view={view}
+                  plannedMeals={plannedMeals}
+                  onDateSelect={handleDateSelect}
+                  onViewChange={handleViewChange}
+                />
+                
+                <FavoritesSection 
+                  showFavorites={showFavorites}
+                  setShowFavorites={setShowFavorites}
+                  likedRecipes={likedRecipes}
+                  selectedDate={date}
+                  onAddToPlanner={handleAddToPlanner}
+                />
+              </div>
+            }
+            content={
+              <AnimatePresence mode="wait">
+                {isLoading ? (
+                  <motion.div
+                    key="loading"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-4 h-full flex items-center justify-center"
+                  >
+                    <div className="animate-pulse space-y-4 w-full">
+                      <div className="h-12 bg-gray-200 rounded-md w-3/4"></div>
+                      <div className="h-32 bg-gray-200 rounded-md w-full"></div>
+                      <div className="h-32 bg-gray-200 rounded-md w-full"></div>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="content"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Card className="overflow-hidden shadow-md p-6 border border-purple-100">
+                      <AnimatePresence mode="wait">
+                        {view === 'day' && (
+                          <motion.div
+                            key="day-view"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <DayPlannerView
+                              date={date}
+                              meals={getMealsForDate(date)}
+                              onToggleMealStatus={handleToggleMealStatus}
+                              onRemoveMeal={handleRemoveMeal}
+                              onAddClick={() => {
+                                if (likedRecipes.length > 0) {
+                                  setShowFavorites(true);
+                                } else {
+                                  toast({
+                                    title: "No Favorite Recipes",
+                                    description: "Like some recipes first to add them to your plan",
+                                  });
+                                }
+                              }}
+                              onGenerateRecipe={handleGenerateRecipe}
+                            />
+                          </motion.div>
+                        )}
+                        
+                        {(view === 'week' || view === 'month') && (
+                          <motion.div
+                            key={`${view}-view`}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <CalendarPlannerView
+                              dates={viewDates}
+                              selectedDate={date}
+                              plannedMeals={plannedMeals}
+                              onDateSelect={handleDateSelect}
+                              view={view}
+                            />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </Card>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            }
+          />
+        </div>
       </div>
     </div>
   );

@@ -3,7 +3,8 @@ import React from 'react';
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar as CalendarIcon, Plus } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, Home } from "lucide-react";
+import { Link } from "react-router-dom";
 import MealPlannerCard from '../components/MealPlannerCard';
 
 const Planner = () => {
@@ -25,13 +26,23 @@ const Planner = () => {
   return (
     <div className="min-h-screen p-6 md:p-8 max-w-6xl mx-auto">
       <div className="space-y-8 fade-up">
-        <header className="mb-8">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-medium mb-2 text-[#4F2D9E]">
-            Meal Planner
-          </h1>
-          <p className="text-lg md:text-xl text-gray-500">
-            Plan your breakfast schedule
-          </p>
+        <header className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-medium mb-2 text-[#4F2D9E]">
+              Meal Planner
+            </h1>
+            <p className="text-lg md:text-xl text-gray-500">
+              Plan your breakfast schedule
+            </p>
+          </div>
+          <Link to="/">
+            <Button 
+              variant="ghost" 
+              className="text-[#4F2D9E] hover:bg-[#4F2D9E]/10"
+            >
+              <Home className="h-5 w-5" />
+            </Button>
+          </Link>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

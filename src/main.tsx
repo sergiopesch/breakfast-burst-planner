@@ -3,8 +3,8 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
-// Add more aggressive cache busting timestamp
-const cacheBuster = `?v=${Date.now()}`;
+// Add more aggressive cache busting timestamp with random component
+const cacheBuster = `?v=${Date.now()}_${Math.random().toString(36).substring(2)}`;
 
 // Apply cache busting to any dynamic resources
 if ('serviceWorker' in navigator) {
@@ -42,7 +42,9 @@ const refreshImages = () => {
   images.forEach(img => {
     const src = img.getAttribute('src')?.split('?')[0] || '';
     if (!src.startsWith('data:') && !src.startsWith('blob:')) {
-      img.setAttribute('src', `${src}${cacheBuster}`);
+      // Use unique timestamp for each image
+      const uniqueTimestamp = `?v=${Date.now()}_${Math.random().toString(36).substring(2)}`;
+      img.setAttribute('src', `${src}${uniqueTimestamp}`);
     }
   });
 };
@@ -57,7 +59,7 @@ const clearCache = async () => {
           return caches.delete(cacheName);
         })
       );
-      console.log('All caches cleared');
+      console.log('All caches cleared successfully');
     } catch (err) {
       console.error('Failed to clear caches:', err);
     }
@@ -70,27 +72,41 @@ clearCache().then(() => {
   refreshScripts();
   refreshImages();
   
-  console.log('Cache busting applied to resources');
+  console.log('Aggressive cache busting applied to all resources');
 });
 
 // Create the React root and render the app
-createRoot(document.getElementById("root")!).render(<App />);
+const rootElement = document.getElementById("root");
+if (rootElement) {
+  const root = createRoot(rootElement);
+  root.render(<App />);
+} else {
+  console.error("Root element not found");
+}
 
 // Add event listener to reload the page if it's been loaded from cache
 window.addEventListener('load', () => {
   if (performance.navigation.type === 1) {
     // This is a refresh, no need to force reload
     console.log('Page is being refreshed naturally');
+    // Still refresh images to ensure they're up to date
+    setTimeout(refreshImages, 500);
   } else {
     // Check if the page might be loaded from cache
     const lastLoadTime = sessionStorage.getItem('lastLoadTime');
     const currentTime = Date.now();
     
-    if (lastLoadTime && (currentTime - parseInt(lastLoadTime, 10)) > 3600000) { // 1 hour
-      console.log('Forcing a hard reload to clear cache');
-      sessionStorage.setItem('lastLoadTime', currentTime.toString());
-      // Use location.reload() without arguments to fix TypeScript error
-      window.location.reload();
+    if (lastLoadTime) {
+      // Force image refresh regardless
+      setTimeout(refreshImages, 300);
+      
+      if ((currentTime - parseInt(lastLoadTime, 10)) > 60000) { // 1 minute
+        console.log('Forcing a hard reload to clear cache');
+        sessionStorage.setItem('lastLoadTime', currentTime.toString());
+        window.location.reload();
+      } else {
+        sessionStorage.setItem('lastLoadTime', currentTime.toString());
+      }
     } else {
       sessionStorage.setItem('lastLoadTime', currentTime.toString());
     }

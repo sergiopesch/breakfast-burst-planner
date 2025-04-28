@@ -17,14 +17,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         // Only refresh if the image has a src and it's not a data URI or blob
         const src = img.getAttribute('src');
         if (src && !src.startsWith('data:') && !src.startsWith('blob:')) {
-          // Apply cache busting
+          // Apply cache busting with more unique timestamp
+          const uniqueTimestamp = Date.now() + Math.random().toString(36).substring(2);
           const newSrc = src.includes('?') 
-            ? `${src.split('?')[0]}?v=${Date.now()}`
-            : `${src}?v=${Date.now()}`;
+            ? `${src.split('?')[0]}?v=${uniqueTimestamp}`
+            : `${src}?v=${uniqueTimestamp}`;
           img.setAttribute('src', newSrc);
         }
       });
-    }, 500);
+    }, 100); // Reduced delay for faster loading
     
     return () => clearTimeout(refreshTimer);
   }, []);

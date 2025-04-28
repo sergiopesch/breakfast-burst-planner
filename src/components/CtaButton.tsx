@@ -15,15 +15,15 @@ const CtaButton: React.FC<CtaButtonProps> = ({ to, children }) => {
   return (
     <Link 
       to={to} 
-      className="inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 font-medium text-lg text-white transition-all duration-300 hover:shadow-lg"
+      className="inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 font-medium text-lg text-white transition-all duration-300 hover:shadow-lg hover:bg-opacity-90"
       style={{ 
         backgroundColor: theme.colors.primary,
       }}
       onMouseOver={(e) => {
-        e.currentTarget.style.backgroundColor = `${theme.colors.secondary}`;
+        e.currentTarget.style.backgroundColor = theme.colors.secondary;
       }}
       onMouseOut={(e) => {
-        e.currentTarget.style.backgroundColor = `${theme.colors.primary}`;
+        e.currentTarget.style.backgroundColor = theme.colors.primary;
       }}
     >
       {children}

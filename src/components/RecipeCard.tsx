@@ -8,6 +8,7 @@ import { supabase, handleSupabaseError, uploadRecipeImage } from '@/lib/supabase
 import { useAuth } from '@/hooks/useAuth';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from "@/components/ui/button";
+import { Recipe } from '@/hooks/useMealPlanner';
 
 // Updated with appropriate images matching recipe content
 const BREAKFAST_RECIPES = [
@@ -115,8 +116,12 @@ const BREAKFAST_RECIPES = [
 
 export { BREAKFAST_RECIPES };
 
-const RecipeCard: React.FC = () => {
-  const [recipe, setRecipe] = useState(() => BREAKFAST_RECIPES[Math.floor(Math.random() * BREAKFAST_RECIPES.length)]);
+interface RecipeCardProps {
+  recipe: Recipe;
+  onClick?: () => void;
+}
+
+const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const { toast } = useToast();
@@ -284,6 +289,7 @@ const RecipeCard: React.FC = () => {
           className="group cursor-pointer"
           whileHover={{ y: -5 }}
           transition={{ type: "spring", stiffness: 300 }}
+          onClick={onClick}
         >
           <div className="neumorphic overflow-hidden rounded-xl transition-all duration-300 hover:shadow-[8px_8px_20px_rgba(0,0,0,0.1),-8px_-8px_20px_rgba(255,255,255,0.8)] dark:hover:shadow-[8px_8px_20px_rgba(0,0,0,0.3),-8px_-8px_20px_rgba(255,255,255,0.05)]">
             <div className="relative aspect-square max-h-[240px] w-full overflow-hidden">
@@ -334,7 +340,7 @@ const RecipeCard: React.FC = () => {
           <div className="space-y-2">
             <h3 className="font-medium text-[#4F2D9E]">Ingredients:</h3>
             <ul className="list-inside list-disc space-y-1 text-gray-600">
-              {recipe.ingredients.map((ingredient, index) => (
+              {recipe.ingredients?.map((ingredient, index) => (
                 <motion.li 
                   key={index} 
                   initial={{ opacity: 0, x: -10 }}
@@ -349,7 +355,7 @@ const RecipeCard: React.FC = () => {
           <div className="space-y-2">
             <h3 className="font-medium text-[#4F2D9E]">Instructions:</h3>
             <ol className="list-inside list-decimal space-y-2 text-gray-600">
-              {recipe.instructions.map((instruction, index) => (
+              {recipe.instructions?.map((instruction, index) => (
                 <motion.li 
                   key={index}
                   initial={{ opacity: 0, x: -10 }}

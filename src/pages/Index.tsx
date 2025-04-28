@@ -39,7 +39,7 @@ const Index = () => {
               <Button
                 onClick={handleRandomize}
                 variant="outline"
-                className="flex items-center gap-2 hover:bg-gray-100"
+                className="flex items-center gap-2 hover:bg-[#4F2D9E]/10 bg-[#4F2D9E] text-white hover:text-[#4F2D9E] border-[#4F2D9E]"
               >
                 <RefreshCw className="h-4 w-4" />
                 New recipe

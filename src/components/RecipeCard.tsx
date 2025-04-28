@@ -71,7 +71,7 @@ const RecipeCard: React.FC = () => {
       <DialogTrigger asChild>
         <div className="group cursor-pointer">
           <div className="neumorphic overflow-hidden rounded-xl transition-all duration-300 hover:shadow-[8px_8px_20px_rgba(0,0,0,0.1),-8px_-8px_20px_rgba(255,255,255,0.8)] dark:hover:shadow-[8px_8px_20px_rgba(0,0,0,0.3),-8px_-8px_20px_rgba(255,255,255,0.05)]">
-            <div className="relative aspect-[4/3] w-full overflow-hidden">
+            <div className="relative aspect-[16/9] w-full overflow-hidden">
               <img
                 src={recipe.image}
                 alt={recipe.title}

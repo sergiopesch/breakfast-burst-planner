@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
-import { supabase, handleSupabaseError, uploadRecipeImage } from '@/lib/supabase';
+import { supabase, handleSupabaseError, uploadRecipeImage, checkTablesExist } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -24,6 +25,7 @@ export const useMealPlanner = (refreshTrigger = 0) => {
   const [likedRecipes, setLikedRecipes] = useState<Recipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [forceCacheRefresh, setForceCacheRefresh] = useState(Date.now());
+  const [useLocalStorage, setUseLocalStorage] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -37,6 +39,21 @@ export const useMealPlanner = (refreshTrigger = 0) => {
       }
       
       try {
+        // Check if tables exist in Supabase
+        const tablesExist = await checkTablesExist();
+        
+        if (!tablesExist) {
+          setUseLocalStorage(true);
+          loadFromLocalStorage();
+          toast({
+            title: "Using Local Storage",
+            description: "Supabase tables not yet available. Using local storage for now.",
+            duration: 5000,
+          });
+          return;
+        }
+        
+        // If tables exist, continue with normal flow
         const { data: dbRecipes, error: recipesError } = await supabase
           .from('recipes')
           .select('*')
@@ -200,7 +217,7 @@ export const useMealPlanner = (refreshTrigger = 0) => {
       status: 'planned'
     };
     
-    if (user) {
+    if (user && !useLocalStorage) {
       try {
         const recipeId = typeof recipe.id === 'number' ? 
           await ensureRecipeExists(recipe) : recipe.id;
@@ -330,7 +347,7 @@ export const useMealPlanner = (refreshTrigger = 0) => {
     const meal = plannedMeals[dateKey][mealIndex];
     const newStatus = meal.status === 'completed' ? 'planned' : 'completed';
     
-    if (user) {
+    if (user && !useLocalStorage) {
       try {
         const { data, error: fetchError } = await supabase
           .from('planned_meals')
@@ -374,7 +391,7 @@ export const useMealPlanner = (refreshTrigger = 0) => {
           status: newStatus
         };
         
-        if (!user) {
+        if (!user || useLocalStorage) {
           localStorage.setItem('plannedMeals', JSON.stringify(updated));
         }
       }
@@ -392,7 +409,7 @@ export const useMealPlanner = (refreshTrigger = 0) => {
     
     const meal = plannedMeals[dateKey][mealIndex];
     
-    if (user) {
+    if (user && !useLocalStorage) {
       try {
         const { error } = await supabase
           .from('planned_meals')
@@ -424,7 +441,7 @@ export const useMealPlanner = (refreshTrigger = 0) => {
           delete updated[dateKey];
         }
         
-        if (!user) {
+        if (!user || useLocalStorage) {
           localStorage.setItem('plannedMeals', JSON.stringify(updated));
         }
       }

@@ -25,6 +25,46 @@ export const handleSupabaseError = (error: any, toast?: any) => {
   return error;
 };
 
+// Check if tables exist, with timeout and retry logic
+export const checkTablesExist = async () => {
+  let attempts = 0;
+  const maxAttempts = 3;
+  
+  while (attempts < maxAttempts) {
+    try {
+      // Try to query the recipes table
+      const { error } = await supabase
+        .from('recipes')
+        .select('id')
+        .limit(1);
+      
+      if (!error) {
+        console.log('Successfully connected to recipes table');
+        return true;
+      }
+      
+      // If there's a specific error that tables don't exist, log it
+      if (error.code === '42P01') {
+        console.warn('Tables not yet created. Attempt:', attempts + 1);
+      } else {
+        console.error('Unknown error checking tables:', error);
+      }
+    } catch (err) {
+      console.error('Exception checking tables:', err);
+    }
+    
+    attempts++;
+    // If we haven't reached max attempts, wait before trying again
+    if (attempts < maxAttempts) {
+      console.log(`Waiting before retry ${attempts}/${maxAttempts}...`);
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+  }
+  
+  console.warn('Tables check failed after maximum attempts. Falling back to local storage.');
+  return false;
+};
+
 // Storage helper functions
 export const uploadRecipeImage = async (file: File, userId: string) => {
   try {

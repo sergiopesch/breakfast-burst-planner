@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { useToast } from "@/hooks/use-toast";
@@ -20,11 +19,16 @@ export const useMealPlanner = (refreshTrigger = 0) => {
   const [plannedMeals, setPlannedMeals] = useState<Record<string, Recipe[]>>({});
   const [likedRecipes, setLikedRecipes] = useState<Recipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [forceCacheRefresh, setForceCacheRefresh] = useState(Date.now()); // Cache busting state
   const { toast } = useToast();
 
   useEffect(() => {
     // Load liked recipes and planned meals from localStorage
     const loadStoredData = () => {
+      // Clear cache on each load
+      localStorage.removeItem('cache-timestamp');
+      localStorage.setItem('cache-timestamp', Date.now().toString());
+      
       const storedRecipes = localStorage.getItem('likedRecipes');
       const storedMeals = localStorage.getItem('plannedMeals');
       
@@ -101,7 +105,12 @@ export const useMealPlanner = (refreshTrigger = 0) => {
     }, 400);
     
     return () => clearTimeout(timer);
-  }, [refreshTrigger]);
+  }, [refreshTrigger, forceCacheRefresh]);
+
+  // Force a refresh of the data
+  const forceRefresh = () => {
+    setForceCacheRefresh(Date.now());
+  };
 
   const addRecipeToPlanner = (recipe: Recipe, date: Date) => {
     if (!date) return;
@@ -182,6 +191,7 @@ export const useMealPlanner = (refreshTrigger = 0) => {
     isLoading,
     addRecipeToPlanner,
     toggleMealStatus,
-    removeMeal
+    removeMeal,
+    forceRefresh
   };
 };

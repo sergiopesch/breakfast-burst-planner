@@ -1,5 +1,6 @@
 
 import { createClient } from '@supabase/supabase-js';
+import { uploadTemplateImagesToSupabase } from '../utils/recipeGenerator';
 
 // Your Supabase project credentials
 // These are the actual credentials from your Supabase dashboard
@@ -11,6 +12,29 @@ export const supabase = createClient(projectUrl, projectAnonKey);
 
 // Log connection info
 console.log('Supabase client initialized');
+
+// Initialize template images in Supabase
+export const initializeTemplateImages = async () => {
+  try {
+    // First, check if the template directory exists in the recipe-images bucket
+    const { data, error } = await supabase.storage
+      .from('recipe-images')
+      .list('template');
+    
+    // If directory doesn't exist or is empty, upload template images
+    if (error || !data || data.length === 0) {
+      console.log('Uploading template recipe images to Supabase storage...');
+      await uploadTemplateImagesToSupabase();
+    } else {
+      console.log('Template recipe images already exist in Supabase storage');
+    }
+  } catch (err) {
+    console.error('Error checking template images:', err);
+  }
+};
+
+// Initialize template images when the app starts
+initializeTemplateImages().catch(console.error);
 
 // Helper function for handling errors in Supabase operations
 export const handleSupabaseError = (error: any, toast?: any) => {

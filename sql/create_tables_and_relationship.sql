@@ -185,7 +185,8 @@ BEGIN
     -- Create the policy if it doesn't exist
     EXECUTE 'CREATE POLICY "Users can update own recipe images" 
       ON storage.objects FOR UPDATE
-      USING (bucket_id = ''recipe-images'' AND auth.uid()::text = (storage.foldername(name))[1])';
+      USING (bucket_id = ''recipe-images'' AND auth.uid()::text = (storage.foldername(name))[1])
+      WITH CHECK (bucket_id = ''recipe-images'' AND auth.uid()::text = (storage.foldername(name))[1])';
   END IF;
   
   -- Check if "Users can delete own recipe images" policy exists
@@ -201,5 +202,35 @@ BEGIN
     EXECUTE 'CREATE POLICY "Users can delete own recipe images" 
       ON storage.objects FOR DELETE
       USING (bucket_id = ''recipe-images'' AND auth.uid()::text = (storage.foldername(name))[1])';
+  END IF;
+  
+  -- Add specific policy for template images to be accessible by everyone
+  SELECT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE policyname = 'Everyone can access template images' 
+    AND tablename = 'objects' 
+    AND schemaname = 'storage'
+  ) INTO policy_exists;
+  
+  IF NOT policy_exists THEN
+    -- Create the policy if it doesn't exist
+    EXECUTE 'CREATE POLICY "Everyone can access template images" 
+      ON storage.objects FOR SELECT
+      USING (bucket_id = ''recipe-images'' AND storage.foldername(name)[1] = ''template'')';
+  END IF;
+  
+  -- Allow authenticated users to upload template images
+  SELECT EXISTS (
+    SELECT 1 FROM pg_policies 
+    WHERE policyname = 'Auth users can upload template images' 
+    AND tablename = 'objects' 
+    AND schemaname = 'storage'
+  ) INTO policy_exists;
+  
+  IF NOT policy_exists THEN
+    -- Create the policy if it doesn't exist
+    EXECUTE 'CREATE POLICY "Auth users can upload template images" 
+      ON storage.objects FOR INSERT
+      WITH CHECK (bucket_id = ''recipe-images'' AND storage.foldername(name)[1] = ''template'' AND auth.role() = ''authenticated'')';
   END IF;
 END $$;

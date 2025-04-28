@@ -1,16 +1,22 @@
 
 import { Recipe } from '@/hooks/useMealPlanner';
+import { supabase } from '@/lib/supabase';
 
-// Array of breakfast recipe images
+// Array of breakfast recipe images stored in Supabase
+const getSupabaseImageUrl = (filename: string) => {
+  return `https://nwnrgctxzqunasquaarl.supabase.co/storage/v1/object/public/recipe-images/template/${filename}`;
+};
+
+// These images will be publicly available from Supabase storage
 const breakfastImages = [
-  "https://images.unsplash.com/photo-1554520735-0a6b8b6ce8b7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80", // Pancakes
-  "https://images.unsplash.com/photo-1588137378633-dea1336ce1e5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80", // Avocado toast
-  "https://images.unsplash.com/photo-1628557044797-f21a177c37ec?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80", // Smoothie
-  "https://images.unsplash.com/photo-1525351484163-7529414344d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80", // Eggs
-  "https://images.unsplash.com/photo-1611740801993-dd9d9fed43a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80", // Oatmeal
-  "https://images.unsplash.com/photo-1484723091739-30a097e8f929?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80", // French toast
-  "https://images.unsplash.com/photo-1615887351252-939222041ae3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80", // Granola bowl
-  "https://images.unsplash.com/photo-1550507992-eb63ffee0847?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80", // Breakfast sandwich
+  getSupabaseImageUrl("pancakes.jpg"),      // Pancakes
+  getSupabaseImageUrl("avocado-toast.jpg"), // Avocado toast
+  getSupabaseImageUrl("smoothie.jpg"),      // Smoothie
+  getSupabaseImageUrl("eggs.jpg"),          // Eggs
+  getSupabaseImageUrl("oatmeal.jpg"),       // Oatmeal
+  getSupabaseImageUrl("french-toast.jpg"),  // French toast
+  getSupabaseImageUrl("granola.jpg"),       // Granola bowl
+  getSupabaseImageUrl("sandwich.jpg"),      // Breakfast sandwich
 ];
 
 // Breakfast recipe templates
@@ -196,4 +202,85 @@ export const generateRecipe = (servings: number = 2): Recipe => {
     instructions: template.baseInstructions,
     time: `${7 + Math.floor(Math.random() * 2)}:${Math.random() > 0.5 ? '00' : (Math.random() > 0.5 ? '15' : (Math.random() > 0.5 ? '30' : '45'))} AM`,
   };
+};
+
+// Function to upload template recipe images to Supabase storage
+export const uploadTemplateImagesToSupabase = async () => {
+  // Mapping of image filenames to URLs for fetching
+  const templateImageUrls = [
+    { 
+      filename: "pancakes.jpg", 
+      url: "https://images.unsplash.com/photo-1554520735-0a6b8b6ce8b7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80" 
+    },
+    { 
+      filename: "avocado-toast.jpg", 
+      url: "https://images.unsplash.com/photo-1588137378633-dea1336ce1e5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80" 
+    },
+    { 
+      filename: "smoothie.jpg", 
+      url: "https://images.unsplash.com/photo-1628557044797-f21a177c37ec?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80" 
+    },
+    { 
+      filename: "eggs.jpg", 
+      url: "https://images.unsplash.com/photo-1525351484163-7529414344d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80" 
+    },
+    { 
+      filename: "oatmeal.jpg", 
+      url: "https://images.unsplash.com/photo-1611740801993-dd9d9fed43a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80" 
+    },
+    { 
+      filename: "french-toast.jpg", 
+      url: "https://images.unsplash.com/photo-1484723091739-30a097e8f929?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80" 
+    },
+    { 
+      filename: "granola.jpg", 
+      url: "https://images.unsplash.com/photo-1615887351252-939222041ae3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80" 
+    },
+    { 
+      filename: "sandwich.jpg", 
+      url: "https://images.unsplash.com/photo-1550507992-eb63ffee0847?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80" 
+    },
+  ];
+  
+  // Create uploads for each image
+  for (const image of templateImageUrls) {
+    try {
+      // Check if the image already exists in Supabase
+      const { data: existingImage } = await supabase.storage
+        .from('recipe-images')
+        .list('template', { 
+          search: image.filename 
+        });
+      
+      // If the image already exists, skip uploading
+      if (existingImage && existingImage.length > 0) {
+        console.log(`Template image ${image.filename} already exists in Supabase storage.`);
+        continue;
+      }
+      
+      // Fetch the image
+      const response = await fetch(image.url);
+      const blob = await response.blob();
+      const file = new File([blob], image.filename, { type: blob.type });
+      
+      // Upload to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('recipe-images')
+        .upload(`template/${image.filename}`, file, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: blob.type
+        });
+      
+      if (error) {
+        console.error(`Error uploading template image ${image.filename}:`, error);
+      } else {
+        console.log(`Successfully uploaded template image: ${image.filename}`);
+      }
+    } catch (err) {
+      console.error(`Failed to upload image ${image.filename}:`, err);
+    }
+  }
+  
+  return true;
 };

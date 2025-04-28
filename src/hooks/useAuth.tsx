@@ -8,6 +8,8 @@ interface AuthContextProps {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  signInWithEmail: (email: string, password: string) => Promise<{ session: Session | null; error: any }>;
+  signUpWithEmail: (email: string, password: string) => Promise<{ session: Session | null; error: any }>;
   signInWithGoogle: () => Promise<{ session: Session | null; error: any }>;
   signOut: () => Promise<{ error: any }>;
 }
@@ -58,6 +60,84 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     
     initializeAuth();
   }, [toast]);
+  
+  const signUpWithEmail = async (email: string, password: string) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        }
+      });
+      
+      if (error) {
+        console.error("Email sign up error:", error);
+        toast({
+          title: "Sign Up Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+        return { session: null, error };
+      }
+      
+      if (data.session) {
+        toast({
+          title: "Sign Up Successful",
+          description: "Your account has been created.",
+        });
+      } else {
+        toast({
+          title: "Verification Email Sent",
+          description: "Please check your email to confirm your account.",
+        });
+      }
+      
+      return { session: data.session, error: null };
+    } catch (error: any) {
+      console.error("Exception during sign up:", error);
+      toast({
+        title: "Sign Up Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+      return { session: null, error };
+    }
+  };
+  
+  const signInWithEmail = async (email: string, password: string) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) {
+        console.error("Email sign in error:", error);
+        toast({
+          title: "Sign In Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+        return { session: null, error };
+      }
+      
+      toast({
+        title: "Sign In Successful",
+        description: "Welcome back!",
+      });
+      
+      return { session: data.session, error: null };
+    } catch (error: any) {
+      console.error("Exception during sign in:", error);
+      toast({
+        title: "Sign In Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+      return { session: null, error };
+    }
+  };
   
   const signInWithGoogle = async () => {
     try {
@@ -135,6 +215,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     user,
     session,
     loading,
+    signUpWithEmail,
+    signInWithEmail,
     signInWithGoogle,
     signOut
   };

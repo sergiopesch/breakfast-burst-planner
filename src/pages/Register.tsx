@@ -8,8 +8,8 @@ const Register = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    // Redirect to login page as we now only have one entry point for authentication
-    navigate('/login');
+    // Redirect to login page with a query param to show register mode
+    navigate('/login?mode=register');
   }, [navigate]);
 
   // This component will just redirect to login

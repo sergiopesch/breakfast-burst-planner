@@ -35,6 +35,8 @@ const FavoritesSection: React.FC<FavoritesSectionProps> = ({
             size="sm"
             onClick={() => setShowFavorites(!showFavorites)}
             className="text-[#4F2D9E] border-[#4F2D9E] hover:bg-[#4F2D9E]/10"
+            aria-expanded={showFavorites}
+            aria-controls="favorites-panel"
           >
             {showFavorites ? "Hide" : "Show"}
           </Button>
@@ -43,6 +45,7 @@ const FavoritesSection: React.FC<FavoritesSectionProps> = ({
         <AnimatePresence>
           {showFavorites && (
             <motion.div
+              id="favorites-panel"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}

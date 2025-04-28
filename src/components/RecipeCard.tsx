@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { Heart, Clock, Coffee, Upload, Loader2, ImageOff } from 'lucide-react';
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { motion } from 'framer-motion';
 import { useToast } from "@/hooks/use-toast";
 import { supabase, handleSupabaseError, uploadRecipeImage } from '@/lib/supabase';
@@ -130,6 +131,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -250,12 +252,12 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick }) => {
               id: recipeId,
               user_id: user.id,
               title: recipe.title,
-              description: recipe.description,
-              prep_time: recipe.prepTime,
+              description: recipe.description || '',
+              prep_time: recipe.prepTime || '',
               image_url: imageUrl,
               image_path: imagePath,
-              ingredients: recipe.ingredients,
-              instructions: recipe.instructions
+              ingredients: recipe.ingredients || [],
+              instructions: recipe.instructions || []
             });
           
           if (error) {
@@ -271,6 +273,9 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick }) => {
         }
         
         setIsLiked(!isLiked);
+        
+        // Trigger storage event to update other components
+        window.dispatchEvent(new Event('storage'));
       } catch (error) {
         console.error('Error updating like status in Supabase:', error);
         // Fall back to localStorage if Supabase fails
@@ -306,74 +311,86 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick }) => {
     
     localStorage.setItem('likedRecipes', JSON.stringify(updatedLikedRecipes));
     setIsLiked(!isLiked);
+    
+    // Trigger storage event to update other components
+    window.dispatchEvent(new Event('storage'));
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <motion.div 
-          className="group cursor-pointer"
-          whileHover={{ y: -5 }}
-          transition={{ type: "spring", stiffness: 300 }}
-          onClick={onClick}
-        >
-          <div className="neumorphic overflow-hidden rounded-xl transition-all duration-300 hover:shadow-[8px_8px_20px_rgba(0,0,0,0.1),-8px_-8px_20px_rgba(255,255,255,0.8)] dark:hover:shadow-[8px_8px_20px_rgba(0,0,0,0.3),-8px_-8px_20px_rgba(255,255,255,0.05)]">
-            <div className="relative aspect-square max-h-[240px] w-full overflow-hidden">
-              {!imageError ? (
-                <img
-                  src={getImageWithCacheBusting(recipe.image)}
-                  alt={recipe.title}
-                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  onError={handleImageError}
-                />
-              ) : (
-                <div className="h-full w-full flex items-center justify-center bg-gray-100">
-                  <div className="flex flex-col items-center text-gray-400">
-                    <ImageOff className="h-10 w-10 mb-2" />
-                    <p className="text-sm">Image not available</p>
-                  </div>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <motion.div 
+        className="group cursor-pointer"
+        whileHover={{ y: -5 }}
+        transition={{ type: "spring", stiffness: 300 }}
+        onClick={() => {
+          if (onClick) {
+            onClick();
+          } else {
+            setIsOpen(true);
+          }
+        }}
+      >
+        <div className="neumorphic overflow-hidden rounded-xl transition-all duration-300 hover:shadow-[8px_8px_20px_rgba(0,0,0,0.1),-8px_-8px_20px_rgba(255,255,255,0.8)] dark:hover:shadow-[8px_8px_20px_rgba(0,0,0,0.3),-8px_-8px_20px_rgba(255,255,255,0.05)]">
+          <div className="relative aspect-square max-h-[240px] w-full overflow-hidden">
+            {!imageError ? (
+              <img
+                src={getImageWithCacheBusting(recipe.image)}
+                alt={recipe.title}
+                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                onError={handleImageError}
+                loading="lazy"
+              />
+            ) : (
+              <div className="h-full w-full flex items-center justify-center bg-gray-100">
+                <div className="flex flex-col items-center text-gray-400">
+                  <ImageOff className="h-10 w-10 mb-2" />
+                  <p className="text-sm">Image not available</p>
                 </div>
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-              <button 
-                className={`absolute right-3 top-3 rounded-full ${isLiked ? 'bg-[#4F2D9E] text-white' : 'bg-white/90 text-[#4F2D9E]'} backdrop-blur-sm p-2 transition-transform hover:scale-110`}
-                onClick={handleLike}
-                disabled={uploadingImage}
-              >
-                {uploadingImage ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  <Heart className={`h-5 w-5 ${isLiked ? 'fill-white' : ''}`} />
-                )}
-              </button>
-            </div>
-            <div className="p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Clock className="h-4 w-4 text-[#4F2D9E]" />
-                <span className="text-sm text-gray-600">{recipe.prepTime}</span>
               </div>
-              <h2 className="mt-2 text-lg font-medium text-[#4F2D9E] flex items-center">
-                <Coffee className="h-4 w-4 mr-2" />
-                {recipe.title}
-              </h2>
-              <p className="mt-1 text-sm text-gray-600">{recipe.description}</p>
-            </div>
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+            <button 
+              className={`absolute right-3 top-3 rounded-full ${isLiked ? 'bg-[#4F2D9E] text-white' : 'bg-white/90 text-[#4F2D9E]'} backdrop-blur-sm p-2 transition-transform hover:scale-110`}
+              onClick={handleLike}
+              disabled={uploadingImage}
+              aria-label={isLiked ? "Remove from favorites" : "Add to favorites"}
+            >
+              {uploadingImage ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Heart className={`h-5 w-5 ${isLiked ? 'fill-white' : ''}`} />
+              )}
+            </button>
           </div>
-        </motion.div>
-      </DialogTrigger>
+          <div className="p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <Clock className="h-4 w-4 text-[#4F2D9E]" />
+              <span className="text-sm text-gray-600">{recipe.prepTime}</span>
+            </div>
+            <h2 className="mt-2 text-lg font-medium text-[#4F2D9E] flex items-center">
+              <Coffee className="h-4 w-4 mr-2" />
+              {recipe.title}
+            </h2>
+            <p className="mt-1 text-sm text-gray-600">{recipe.description}</p>
+          </div>
+        </div>
+      </motion.div>
 
       <DialogContent className="sm:max-w-[425px]">
+        <DialogTitle className="text-xl font-semibold text-[#4F2D9E] flex items-center">
+          <Coffee className="h-5 w-5 mr-2" />
+          {recipe.title}
+        </DialogTitle>
+        <DialogDescription>
+          {recipe.description}
+        </DialogDescription>
+        
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
           className="space-y-4 p-4"
         >
-          <h2 className="text-xl font-semibold text-[#4F2D9E] flex items-center">
-            <Coffee className="h-5 w-5 mr-2" />
-            {recipe.title}
-          </h2>
-          
           {recipe.image && !imageError && (
             <div className="rounded-lg overflow-hidden">
               <img 
@@ -381,6 +398,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick }) => {
                 alt={recipe.title}
                 className="w-full h-auto"
                 onError={handleImageError}
+                loading="lazy"
               />
             </div>
           )}

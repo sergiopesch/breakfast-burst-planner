@@ -8,6 +8,7 @@ import { RefreshCw, Coffee, Heart, BookOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BREAKFAST_RECIPES } from '../components/RecipeCard';
 import { useTheme } from '../components/ThemeProvider';
+import ImageLoader from '../components/ImageLoader';
 
 const Index = () => {
   const theme = useTheme();
@@ -23,8 +24,13 @@ const Index = () => {
     
     // Load favorite count
     const loadFavorites = () => {
-      const likedRecipes = JSON.parse(localStorage.getItem('likedRecipes') || '[]');
-      setFavoriteCount(likedRecipes.length);
+      try {
+        const likedRecipes = JSON.parse(localStorage.getItem('likedRecipes') || '[]');
+        setFavoriteCount(likedRecipes.length);
+      } catch (error) {
+        console.error("Error loading favorites:", error);
+        setFavoriteCount(0);
+      }
     };
     
     loadFavorites();
@@ -36,22 +42,24 @@ const Index = () => {
     
     window.addEventListener('storage', handleStorageChange);
     
-    // Check for changes every few seconds (for when the same window makes changes)
-    const interval = setInterval(loadFavorites, 2000);
+    // Check for changes when custom event is dispatched
+    window.addEventListener('favoritesUpdated', handleStorageChange);
     
     return () => {
-      clearInterval(interval);
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('favoritesUpdated', handleStorageChange);
     };
   }, []);
 
   const handleRandomize = () => {
-    setCurrentRecipe(BREAKFAST_RECIPES[Math.floor(Math.random() * BREAKFAST_RECIPES.length)]);
+    const recipes = BREAKFAST_RECIPES.filter(recipe => recipe.id !== currentRecipe.id);
+    const newRecipe = recipes[Math.floor(Math.random() * recipes.length)];
+    setCurrentRecipe(newRecipe);
     setRecipeKey(prev => prev + 1);
   };
 
   return (
-    <div className={`min-h-screen p-6 md:p-8 max-w-4xl mx-auto bg-[${theme.colors.background}]`}>
+    <div className="min-h-screen p-6 md:p-8 max-w-4xl mx-auto">
       <div className={`space-y-8 ${isVisible ? 'fade-up' : 'opacity-0'}`}>
         {/* Greeting Header */}
         <motion.header 
@@ -61,7 +69,7 @@ const Index = () => {
           className="mb-8"
         >
           <h1 className={`text-3xl md:text-4xl lg:text-5xl ${theme.fonts.heading} mb-2 text-[${theme.colors.primary}] flex items-center`}>
-            <Coffee className="h-8 w-8 mr-3" />
+            <Coffee className="h-8 w-8 mr-3" aria-hidden="true" />
             Good morning!
           </h1>
           <p className="text-lg md:text-xl text-gray-500">What's for breakfast today?</p>
@@ -80,9 +88,10 @@ const Index = () => {
               <div className="flex items-center gap-4">
                 <Button
                   onClick={handleRandomize}
-                  className={`flex items-center gap-2 bg-[${theme.colors.primary}] text-white hover:bg-[${theme.colors.secondary}] transition-colors`}
+                  className="flex items-center gap-2 bg-[#4F2D9E] text-white hover:bg-[#3D1C8F] transition-colors"
+                  aria-label="Show me a different recipe"
                 >
-                  <RefreshCw className="h-4 w-4" />
+                  <RefreshCw className="h-4 w-4" aria-hidden="true" />
                   Surprise me
                 </Button>
                 
@@ -94,8 +103,10 @@ const Index = () => {
                       exit={{ opacity: 0, x: -20 }}
                       className="flex items-center"
                     >
-                      <Heart className={`h-5 w-5 mr-1 fill-[${theme.colors.primary}] text-[${theme.colors.primary}]`} />
-                      <span className={`text-sm font-medium text-[${theme.colors.primary}]`}>{favoriteCount} recipe{favoriteCount !== 1 ? 's' : ''} saved</span>
+                      <Heart className="h-5 w-5 mr-1 fill-[#4F2D9E] text-[#4F2D9E]" aria-hidden="true" />
+                      <span className="text-sm font-medium text-[#4F2D9E]">
+                        {favoriteCount} recipe{favoriteCount !== 1 ? 's' : ''} saved
+                      </span>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -103,9 +114,9 @@ const Index = () => {
               
               <Link 
                 to="/recipes"
-                className={`flex items-center text-sm font-medium text-[${theme.colors.primary}] hover:underline`}
+                className="flex items-center text-sm font-medium text-[#4F2D9E] hover:underline"
               >
-                <BookOpen className="h-4 w-4 mr-1" />
+                <BookOpen className="h-4 w-4 mr-1" aria-hidden="true" />
                 View all recipes
               </Link>
             </div>
@@ -117,11 +128,11 @@ const Index = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className={`w-full mt-8 p-6 bg-gradient-to-br from-white to-[${theme.colors.accent}] rounded-xl shadow-sm`}
+            className="w-full mt-8 p-6 bg-gradient-to-br from-white to-[#E5DEFF] rounded-xl shadow-sm"
           >
             <div className="space-y-4">
-              <h2 className={`text-xl ${theme.fonts.heading} text-[${theme.colors.primary}] flex items-center`}>
-                <Coffee className="h-5 w-5 mr-2" />
+              <h2 className="text-xl font-medium text-[#4F2D9E] flex items-center">
+                <Coffee className="h-5 w-5 mr-2" aria-hidden="true" />
                 Plan your breakfast week
               </h2>
               <p className="text-gray-600 mb-4">Organize your morning meals to start each day right</p>

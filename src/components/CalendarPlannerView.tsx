@@ -3,7 +3,7 @@ import React from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import { Recipe } from '@/hooks/useMealPlanner';
 import CompactMealCard from './CompactMealCard';
-import { format, isSameMonth } from 'date-fns';
+import { format, isSameMonth, isToday } from 'date-fns';
 import { cn } from "@/lib/utils";
 
 interface CalendarPlannerViewProps {
@@ -51,6 +51,7 @@ const CalendarPlannerView: React.FC<CalendarPlannerViewProps> = ({
             const isSelected = dateKey === selectedDateStr;
             const meals = getMealsForDate(date);
             const isCurrentMonth = view === 'month' ? isSameMonth(date, selectedDate) : true;
+            const isCurrentDay = isToday(date);
             
             return (
               <motion.div
@@ -69,6 +70,7 @@ const CalendarPlannerView: React.FC<CalendarPlannerViewProps> = ({
                   meals={meals}
                   onClick={() => onDateSelect(date)}
                   isSelected={isSelected}
+                  isToday={isCurrentDay}
                   view={view}
                 />
               </motion.div>

@@ -5,12 +5,17 @@ export function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(false);
 
   useEffect(() => {
+    // Set initial value immediately for SSR
+    if (typeof window !== 'undefined') {
+      setMatches(window.matchMedia(query).matches);
+    }
+    
     const media = window.matchMedia(query);
     
     // Set initial value
     setMatches(media.matches);
     
-    // Set up listener
+    // Handler function
     const listener = (e: MediaQueryListEvent) => {
       setMatches(e.matches);
     };

@@ -122,7 +122,7 @@ const FavoriteRecipesPanel: React.FC<FavoriteRecipesPanelProps> = ({
                         </DialogContent>
                       </Dialog>
                       
-                      {selectedDate && onAddToPlanner && <Button variant="outline" size="sm" onClick={() => onAddToPlanner(recipe)} className="text-[#4F2D9E] border-[#4F2D9E] hover:bg-[#4F2D9E]/10 px-0 my-0 py-0 mx-0">
+                      {selectedDate && onAddToPlanner && <Button variant="outline" size="sm" onClick={() => onAddToPlanner(recipe)} className="text-[#4F2D9E] border-[#4F2D9E] hover:bg-[#4F2D9E]/10 mx-px my-[6px] py-[2px] px-[4px]">
                           <Plus className="h-4 w-4 mr-1" />
                           Add
                         </Button>}

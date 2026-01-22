@@ -1,11 +1,11 @@
 
 import React from 'react';
 import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
-import { Coffee, Check, Plus, Image as ImageIcon } from "lucide-react";
+import { Coffee, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Recipe } from '@/hooks/useMealPlanner';
 import { format } from 'date-fns';
+import ImageLoader from './ImageLoader';
 
 interface MealPlannerCardProps {
   date: Date;
@@ -64,11 +64,14 @@ const MealPlannerCard: React.FC<MealPlannerCardProps> = ({
 
         {hasMeals && firstRecipeWithImage ? (
           <div className="relative flex-grow">
-            <div 
-              className="w-full h-full aspect-[4/3] bg-cover bg-center"
-              style={{ backgroundImage: `url(${firstRecipeWithImage.image})` }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-2">
+            <div className="w-full h-full aspect-[4/3] overflow-hidden">
+              <ImageLoader
+                src={firstRecipeWithImage.image}
+                alt={firstRecipeWithImage.title}
+                className="w-full h-full object-cover"
+                fallbackClassName="w-full h-full flex items-center justify-center bg-secondary"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-2 pointer-events-none">
                 <span className="text-white text-xs font-medium truncate">{firstRecipeWithImage.title}</span>
               </div>
             </div>
@@ -80,16 +83,16 @@ const MealPlannerCard: React.FC<MealPlannerCardProps> = ({
           </div>
         ) : (
           <div className="flex items-center justify-center p-2 flex-grow">
-            <div className="text-center text-gray-400 flex flex-col items-center py-2">
+            <div className="text-center text-muted-foreground flex flex-col items-center py-2">
               {!hasMeals ? (
                 <>
-                  <Coffee className="h-5 w-5 mb-1" />
-                  <span className="text-xs">No meals</span>
+                  <Coffee className="h-5 w-5 mb-1 opacity-60" />
+                  <span className="text-xs opacity-70">No meals</span>
                 </>
               ) : (
                 <>
-                  <ImageIcon className="h-5 w-5 mb-1" />
-                  <span className="text-xs">No image</span>
+                  <ImageIcon className="h-5 w-5 mb-1 opacity-60" />
+                  <span className="text-xs opacity-70">No image</span>
                 </>
               )}
             </div>

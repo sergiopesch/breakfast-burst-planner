@@ -9,20 +9,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { Button } from "@/components/ui/button";
 import { Recipe } from '@/hooks/useMealPlanner';
 import ImageLoader from './ImageLoader';
+import { BREAKFAST_IMAGE_URLS } from '@/utils/recipeGenerator';
 
-// Get Supabase image URL helper with cache busting
-const getSupabaseImageUrl = (filename: string) => {
-  return `https://nwnrgctxzqunasquaarl.supabase.co/storage/v1/object/public/recipe-images/template/${filename}`;
-};
-
-// Updated with Supabase-hosted images
+// Breakfast recipes with reliable Unsplash image URLs
 const BREAKFAST_RECIPES = [
   {
     id: 1,
     title: "Quick Banana Oatmeal",
     description: "A healthy breakfast bowl with creamy oats and fresh banana slices",
     prepTime: "8 min prep",
-    image: getSupabaseImageUrl("oatmeal.jpg"),
+    image: BREAKFAST_IMAGE_URLS.oatmeal,
     ingredients: [
       "1 cup quick oats",
       "1 ripe banana, sliced",
@@ -42,7 +38,7 @@ const BREAKFAST_RECIPES = [
     title: "Avocado Toast",
     description: "Classic breakfast favorite with perfectly toasted bread and creamy avocado",
     prepTime: "5 min prep",
-    image: getSupabaseImageUrl("avocado-toast.jpg"),
+    image: BREAKFAST_IMAGE_URLS.avocadoToast,
     ingredients: [
       "2 slices whole grain bread",
       "1 ripe avocado",
@@ -62,7 +58,7 @@ const BREAKFAST_RECIPES = [
     title: "Berry Yogurt Parfait",
     description: "Light and refreshing layers of yogurt, berries, and crunchy granola",
     prepTime: "6 min prep",
-    image: getSupabaseImageUrl("granola.jpg"),
+    image: BREAKFAST_IMAGE_URLS.granola,
     ingredients: [
       "1 cup Greek yogurt",
       "1/2 cup mixed berries",
@@ -82,7 +78,7 @@ const BREAKFAST_RECIPES = [
     title: "Breakfast Smoothie Bowl",
     description: "Nutrient-packed morning fuel with beautiful toppings",
     prepTime: "7 min prep",
-    image: getSupabaseImageUrl("smoothie.jpg"),
+    image: BREAKFAST_IMAGE_URLS.smoothie,
     ingredients: [
       "1 frozen banana",
       "1/2 cup frozen berries",
@@ -102,7 +98,7 @@ const BREAKFAST_RECIPES = [
     title: "Breakfast Quesadilla",
     description: "Savory morning delight with fluffy eggs and melted cheese",
     prepTime: "10 min prep",
-    image: getSupabaseImageUrl("sandwich.jpg"),
+    image: BREAKFAST_IMAGE_URLS.sandwich,
     ingredients: [
       "2 flour tortillas",
       "2 eggs, scrambled",

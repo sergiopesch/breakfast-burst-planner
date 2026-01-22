@@ -9,6 +9,7 @@ import { Recipe } from '@/hooks/useMealPlanner';
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { format } from 'date-fns';
+import ImageLoader from './ImageLoader';
 
 interface FavoriteRecipesPanelProps {
   likedRecipes: Recipe[];
@@ -80,27 +81,27 @@ const FavoriteRecipesPanel: React.FC<FavoriteRecipesPanelProps> = ({
             >
               <Card className={cn(
                 "overflow-hidden transition-all duration-200 hover:shadow-md",
-                "border-l-4 border-l-[#4F2D9E]"
+                "border-l-4 border-l-primary"
               )}>
                 <CardContent className="p-4 my-0 px-0 mx-px py-[11px]">
                   <div className="flex items-center gap-3 px-0 mx-[16px] my-0 py-0">
                     <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg">
-                      <img 
-                        src={recipe.image} 
-                        alt={recipe.title} 
+                      <ImageLoader
+                        src={recipe.image}
+                        alt={recipe.title}
                         className="h-full w-full object-cover"
-                        loading="lazy" 
+                        fallbackClassName="h-full w-full flex items-center justify-center bg-secondary"
                       />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-medium text-[#4F2D9E]">
+                      <h3 className="font-medium text-primary">
                         {recipe.title}
                       </h3>
                     </div>
                     <div className="flex flex-col gap-2">
                       <Dialog open={openRecipeId === recipe.id} onOpenChange={(open) => setOpenRecipeId(open ? recipe.id : null)}>
                         <DialogContent className="sm:max-w-[500px]">
-                          <DialogTitle className="text-xl font-semibold text-[#4F2D9E] flex items-center">
+                          <DialogTitle className="text-xl font-semibold text-primary flex items-center">
                             <Coffee className="h-5 w-5 mr-2" />
                             {recipe.title}
                           </DialogTitle>
@@ -111,11 +112,11 @@ const FavoriteRecipesPanel: React.FC<FavoriteRecipesPanelProps> = ({
                           <div className="space-y-4 p-4">
                             <div className="flex items-start gap-4">
                               <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg">
-                                <img 
-                                  src={recipe.image} 
-                                  alt={recipe.title} 
-                                  className="h-full w-full object-cover" 
-                                  loading="lazy"
+                                <ImageLoader
+                                  src={recipe.image}
+                                  alt={recipe.title}
+                                  className="h-full w-full object-cover"
+                                  fallbackClassName="h-full w-full flex items-center justify-center bg-secondary"
                                 />
                               </div>
                               <div>
@@ -129,7 +130,7 @@ const FavoriteRecipesPanel: React.FC<FavoriteRecipesPanelProps> = ({
                             </div>
                             
                             <div className="space-y-2">
-                              <h3 className="font-medium text-[#4F2D9E]">Ingredients:</h3>
+                              <h3 className="font-medium text-primary">Ingredients:</h3>
                               <ul className="list-inside list-disc space-y-1 text-gray-600">
                                 {recipe.ingredients?.map((ingredient, index) => (
                                   <li key={index}>{ingredient}</li>
@@ -138,7 +139,7 @@ const FavoriteRecipesPanel: React.FC<FavoriteRecipesPanelProps> = ({
                             </div>
                             
                             <div className="space-y-2">
-                              <h3 className="font-medium text-[#4F2D9E]">Instructions:</h3>
+                              <h3 className="font-medium text-primary">Instructions:</h3>
                               <ol className="list-inside list-decimal space-y-2 text-gray-600">
                                 {recipe.instructions?.map((instruction, index) => (
                                   <li key={index}>{instruction}</li>
@@ -153,7 +154,7 @@ const FavoriteRecipesPanel: React.FC<FavoriteRecipesPanelProps> = ({
                                     onAddToPlanner(recipe);
                                     setOpenRecipeId(null);
                                   }} 
-                                  className="bg-[#4F2D9E] text-white hover:bg-[#4F2D9E]/90"
+                                  className="bg-primary text-white hover:bg-primary/90"
                                 >
                                   <Plus className="h-4 w-4 mr-2" />
                                   Add to {format(selectedDate, 'MMM d')}
@@ -168,7 +169,7 @@ const FavoriteRecipesPanel: React.FC<FavoriteRecipesPanelProps> = ({
                         variant="outline" 
                         size="sm" 
                         onClick={() => setOpenRecipeId(recipe.id)} 
-                        className="text-[#4F2D9E] border-[#4F2D9E] hover:bg-[#4F2D9E]/10 mx-px my-[6px] py-[2px] px-[4px]"
+                        className="text-primary border-primary hover:bg-primary/10 mx-px my-[6px] py-[2px] px-[4px]"
                       >
                         View
                       </Button>
@@ -178,7 +179,7 @@ const FavoriteRecipesPanel: React.FC<FavoriteRecipesPanelProps> = ({
                           variant="outline" 
                           size="sm" 
                           onClick={() => onAddToPlanner(recipe)} 
-                          className="text-[#4F2D9E] border-[#4F2D9E] hover:bg-[#4F2D9E]/10 mx-px my-[6px] py-[2px] px-[4px]"
+                          className="text-primary border-primary hover:bg-primary/10 mx-px my-[6px] py-[2px] px-[4px]"
                         >
                           <Plus className="h-4 w-4 mr-1" />
                           Add

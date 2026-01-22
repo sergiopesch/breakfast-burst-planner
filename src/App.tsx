@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import ThemeProvider from "./components/ThemeProvider";
 import Layout from "./components/Layout";
@@ -19,28 +19,30 @@ import { useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
 const AuthCallback = () => {
+  const navigate = useNavigate();
+
   useEffect(() => {
     // This component captures the OAuth redirect and allows Supabase to handle the authentication
     console.log("AuthCallback component mounted");
-    
+
     const handleAuthCallback = async () => {
       const { hash, search } = window.location;
       console.log("Auth callback URL info:", { hash, search });
-      
+
       // Let Supabase handle the hash fragment (it contains the access token)
       const { data, error } = await supabase.auth.getSession();
       console.log("Auth session result:", { data, error });
-      
+
       if (error) {
         console.error("Auth callback error:", error);
       }
-      
-      // Redirect to the planner page after authentication
-      window.location.href = "/planner";
+
+      // Navigate to the planner page after authentication (preserves React state)
+      navigate("/planner", { replace: true });
     };
-    
+
     handleAuthCallback();
-  }, []);
+  }, [navigate]);
 
   return <div className="flex justify-center items-center h-screen">Completing authentication...</div>;
 };

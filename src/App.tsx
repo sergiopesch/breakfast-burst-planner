@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,17 +5,18 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import ThemeProvider from "./components/ThemeProvider";
+import ErrorBoundary from "./components/ErrorBoundary";
 import Layout from "./components/Layout";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Planner from "./pages/Planner";
 import Recipes from "./pages/Recipes";
 import CreateRecipe from "./pages/CreateRecipe";
-import Profile from "./pages/Profile"; 
+import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 const AuthCallback = () => {
   const navigate = useNavigate();
@@ -26,6 +26,12 @@ const AuthCallback = () => {
     console.log("AuthCallback component mounted");
 
     const handleAuthCallback = async () => {
+      if (!isSupabaseConfigured()) {
+        console.warn("Supabase not configured, redirecting to home");
+        navigate("/", { replace: true });
+        return;
+      }
+
       const { hash, search } = window.location;
       console.log("Auth callback URL info:", { hash, search });
 
@@ -44,42 +50,57 @@ const AuthCallback = () => {
     handleAuthCallback();
   }, [navigate]);
 
-  return <div className="flex justify-center items-center h-screen">Completing authentication...</div>;
+  return (
+    <div className="flex flex-col justify-center items-center h-screen bg-background">
+      <div className="animate-pulse-soft text-foreground">Completing authentication...</div>
+    </div>
+  );
 };
 
-const queryClient = new QueryClient();
+// Configure React Query with sensible defaults
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 2,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <ThemeProvider>
-        <AuthProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Layout><Index /></Layout>} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Navigate to="/login" replace />} />
-              <Route path="/auth/callback" element={<AuthCallback />} />
-              <Route path="/planner" element={<Layout><Planner /></Layout>} />
-              <Route path="/recipes" element={<Layout><Recipes /></Layout>} />
-              <Route path="/create-recipe" element={<Layout><CreateRecipe /></Layout>} />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <Layout><Profile /></Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="*" element={<Layout><NotFound /></Layout>} />
-            </Routes>
-          </BrowserRouter>
-        </AuthProvider>
-      </ThemeProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Layout><Index /></Layout>} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Navigate to="/login" replace />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
+                <Route path="/planner" element={<Layout><Planner /></Layout>} />
+                <Route path="/recipes" element={<Layout><Recipes /></Layout>} />
+                <Route path="/create-recipe" element={<Layout><CreateRecipe /></Layout>} />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Layout><Profile /></Layout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="*" element={<Layout><NotFound /></Layout>} />
+              </Routes>
+            </BrowserRouter>
+          </AuthProvider>
+        </ThemeProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;

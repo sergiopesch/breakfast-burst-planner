@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { memo } from 'react';
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Check, Clock, Trash2 } from "lucide-react";
@@ -74,11 +73,13 @@ const PlannerRecipeCard: React.FC<PlannerRecipeCardProps> = ({
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1" role="group" aria-label="Meal actions">
             <Button
               variant="ghost"
               size="icon"
               onClick={onToggleStatus}
+              aria-label={meal.status === 'completed' ? 'Mark as not completed' : 'Mark as completed'}
+              aria-pressed={meal.status === 'completed'}
               className={cn(
                 "h-8 w-8 rounded-full transition-colors",
                 meal.status === 'completed'
@@ -89,15 +90,16 @@ const PlannerRecipeCard: React.FC<PlannerRecipeCardProps> = ({
               <Check className={cn(
                 "h-4 w-4",
                 meal.status === 'completed' && "stroke-[2.5px]"
-              )} />
+              )} aria-hidden="true" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={onRemove}
+              aria-label={`Remove ${meal.title} from plan`}
               className="h-8 w-8 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-4 w-4" aria-hidden="true" />
             </Button>
           </div>
         </div>
@@ -106,4 +108,4 @@ const PlannerRecipeCard: React.FC<PlannerRecipeCardProps> = ({
   );
 };
 
-export default PlannerRecipeCard;
+export default memo(PlannerRecipeCard);

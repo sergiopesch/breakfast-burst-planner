@@ -7,7 +7,7 @@ import { Save, Plus, X, ArrowLeft, Image as ImageIcon } from "lucide-react";
 
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase, uploadRecipeImage } from '@/lib/supabase';
+import { supabase, uploadRecipeImage, isSupabaseConfigured } from '@/lib/supabase';
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -103,8 +103,8 @@ const CreateRecipe = () => {
       let imageUrl = null;
       let imagePath = null;
 
-      // If user is logged in, save to Supabase
-      if (user) {
+      // If user is logged in and Supabase is configured, save to Supabase
+      if (user && isSupabaseConfigured()) {
         // Upload image if selected
         if (selectedImage) {
           const { path, url, error } = await uploadRecipeImage(selectedImage, user.id);

@@ -58,8 +58,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
+      {/* Skip to main content link for keyboard users */}
+      <a
+        href="#main-content"
+        className="skip-link"
+      >
+        Skip to main content
+      </a>
       <NavBar />
-      <main className="flex-grow pt-16">{children}</main>
+      <main id="main-content" className="flex-grow pt-16" role="main">
+        {children}
+      </main>
       <Footer />
     </div>
   );

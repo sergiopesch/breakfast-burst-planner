@@ -44,10 +44,10 @@ const FavoriteRecipesPanel: React.FC<FavoriteRecipesPanelProps> = ({
 
   if (likedRecipes.length === 0) {
     return (
-      <div className="rounded-lg bg-white/80 backdrop-blur-sm shadow-sm p-6 text-center">
-        <Heart className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-        <p className="text-gray-500">No favorite recipes yet</p>
-        <p className="text-sm text-gray-400 mt-2">Like some recipes to add them here</p>
+      <div className="rounded-lg bg-card/80 backdrop-blur-sm shadow-sm border border-border/40 p-6 text-center">
+        <Heart className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
+        <p className="text-muted-foreground">No favorite recipes yet</p>
+        <p className="text-sm text-muted-foreground/70 mt-2">Like some recipes to add them here</p>
       </div>
     );
   }
@@ -59,13 +59,14 @@ const FavoriteRecipesPanel: React.FC<FavoriteRecipesPanelProps> = ({
       className="space-y-4"
     >
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-        <Input 
-          type="text" 
-          placeholder="Search favorite recipes..." 
-          value={searchTerm} 
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+        <Input
+          type="text"
+          placeholder="Search favorite recipes..."
+          value={searchTerm}
           onChange={handleSearchChange}
-          className="pl-10 bg-white/80 backdrop-blur-sm" 
+          className="pl-10 bg-card/80 backdrop-blur-sm border-border/50"
+          aria-label="Search favorite recipes"
         />
       </div>
       
@@ -121,8 +122,8 @@ const FavoriteRecipesPanel: React.FC<FavoriteRecipesPanelProps> = ({
                               </div>
                               <div>
                                 {recipe.prepTime && (
-                                  <p className="text-sm text-gray-500 flex items-center mt-1">
-                                    <Coffee className="h-4 w-4 mr-1" />
+                                  <p className="text-sm text-muted-foreground flex items-center mt-1">
+                                    <Coffee className="h-4 w-4 mr-1" aria-hidden="true" />
                                     Prep time: {recipe.prepTime}
                                   </p>
                                 )}
@@ -131,16 +132,16 @@ const FavoriteRecipesPanel: React.FC<FavoriteRecipesPanelProps> = ({
                             
                             <div className="space-y-2">
                               <h3 className="font-medium text-primary">Ingredients:</h3>
-                              <ul className="list-inside list-disc space-y-1 text-gray-600">
+                              <ul className="list-inside list-disc space-y-1 text-foreground/70">
                                 {recipe.ingredients?.map((ingredient, index) => (
                                   <li key={index}>{ingredient}</li>
                                 ))}
                               </ul>
                             </div>
-                            
+
                             <div className="space-y-2">
                               <h3 className="font-medium text-primary">Instructions:</h3>
-                              <ol className="list-inside list-decimal space-y-2 text-gray-600">
+                              <ol className="list-inside list-decimal space-y-2 text-foreground/70">
                                 {recipe.instructions?.map((instruction, index) => (
                                   <li key={index}>{instruction}</li>
                                 ))}

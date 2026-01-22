@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMealPlanner, Recipe } from '@/hooks/useMealPlanner';
@@ -23,10 +22,10 @@ const Planner = () => {
   const { toast } = useToast();
 
   // Get data from our custom hook
-  const { 
-    plannedMeals, 
-    likedRecipes, 
-    isLoading, 
+  const {
+    plannedMeals,
+    likedRecipes,
+    isLoading,
     addRecipeToPlanner,
     toggleMealStatus,
     removeMeal
@@ -61,17 +60,17 @@ const Planner = () => {
       });
       return;
     }
-    
+
     addRecipeToPlanner(recipe, date);
     setRefreshKey(prev => prev + 1);
   };
-  
+
   const handleGenerateRecipe = (servings: number) => {
     const currentMeals = getMealsForDate(date);
     if (currentMeals.length > 0) {
       return;
     }
-    
+
     const newRecipe = generateRecipe(servings);
     addRecipeToPlanner(newRecipe, date);
     setRefreshKey(prev => prev + 1);
@@ -88,26 +87,26 @@ const Planner = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F5FF]">
-      <div className="p-4 md:p-8 max-w-7xl mx-auto">
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 md:px-6 py-8 max-w-7xl">
         <div className="space-y-8">
-          <PlannerHeader 
-            title="Breakfast Planner" 
-            subtitle="Plan your morning meals with ease" 
+          <PlannerHeader
+            title="Breakfast Planner"
+            subtitle="Plan your morning meals with ease"
           />
 
           <PlannerLayout
             sidebar={
               <div className="space-y-6">
-                <CalendarView 
+                <CalendarView
                   date={date}
                   view={view}
                   plannedMeals={plannedMeals}
                   onDateSelect={handleDateSelect}
                   onViewChange={handleViewChange}
                 />
-                
-                <FavoritesSection 
+
+                <FavoritesSection
                   showFavorites={showFavorites}
                   setShowFavorites={setShowFavorites}
                   likedRecipes={likedRecipes}
@@ -126,10 +125,10 @@ const Planner = () => {
                     exit={{ opacity: 0 }}
                     className="space-y-4 h-full flex items-center justify-center"
                   >
-                    <div className="animate-pulse space-y-4 w-full">
-                      <div className="h-12 bg-gray-200 rounded-md w-3/4"></div>
-                      <div className="h-32 bg-gray-200 rounded-md w-full"></div>
-                      <div className="h-32 bg-gray-200 rounded-md w-full"></div>
+                    <div className="space-y-4 w-full">
+                      <div className="h-12 bg-secondary/50 rounded-lg w-3/4 shimmer"></div>
+                      <div className="h-32 bg-secondary/50 rounded-xl w-full shimmer"></div>
+                      <div className="h-32 bg-secondary/50 rounded-xl w-full shimmer"></div>
                     </div>
                   </motion.div>
                 ) : (
@@ -140,7 +139,7 @@ const Planner = () => {
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <Card className="overflow-hidden shadow-md p-6 border border-purple-100">
+                    <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border/40 p-6 shadow-elegant">
                       <AnimatePresence mode="sync">
                         {view === 'day' && (
                           <motion.div
@@ -169,7 +168,7 @@ const Planner = () => {
                             />
                           </motion.div>
                         )}
-                        
+
                         {(view === 'week' || view === 'month') && (
                           <motion.div
                             key={`${view}-view`}
@@ -188,7 +187,7 @@ const Planner = () => {
                           </motion.div>
                         )}
                       </AnimatePresence>
-                    </Card>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>

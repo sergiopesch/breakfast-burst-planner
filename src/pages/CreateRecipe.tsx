@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from "react-hook-form";
 import { v4 as uuidv4 } from 'uuid';
-import { ChefHat, Save, Plus, X, FileText } from "lucide-react";
+import { Save, Plus, X, ArrowLeft, Image as ImageIcon } from "lucide-react";
 
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,17 +12,14 @@ import { supabase, uploadRecipeImage } from '@/lib/supabase';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { 
+import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Card } from "@/components/ui/card";
-import NavBar from '@/components/NavBar';
 
 type FormValues = {
   title: string;
@@ -37,11 +34,11 @@ const CreateRecipe = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  
+
   const form = useForm<FormValues>({
     defaultValues: {
       title: '',
@@ -57,7 +54,7 @@ const CreateRecipe = () => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setSelectedImage(file);
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -188,113 +185,148 @@ const CreateRecipe = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F5FF]">
-      <NavBar />
-      <div className="container mx-auto p-4 md:p-8 max-w-3xl">
-        <div className="flex items-center space-x-2 mb-6">
-          <ChefHat className="h-6 w-6 text-purple-500" />
-          <h1 className="text-2xl font-bold">Create New Recipe</h1>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 md:px-6 py-8 max-w-2xl">
+        {/* Header */}
+        <div className="mb-8">
+          <Link
+            to="/recipes"
+            className="group inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mb-6"
+          >
+            <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
+            Back to Recipes
+          </Link>
+
+          <span className="text-xs font-medium tracking-widest uppercase text-muted-foreground mb-2 block">
+            New recipe
+          </span>
+          <h1 className="text-2xl md:text-3xl font-medium text-foreground">
+            Create Recipe
+          </h1>
         </div>
-        
-        <Card className="p-6 shadow-md border border-purple-100">
+
+        {/* Form */}
+        <div className="bg-card/50 backdrop-blur-sm rounded-xl border border-border/40 p-6 md:p-8 shadow-elegant">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               {/* Recipe Title */}
               <FormField
                 control={form.control}
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Recipe Title</FormLabel>
+                    <FormLabel className="text-sm font-medium">Recipe Title</FormLabel>
                     <FormControl>
-                      <Input placeholder="Delicious Pancakes" {...field} />
+                      <Input
+                        placeholder="Delicious Pancakes"
+                        className="rounded-lg border-border/50 focus:border-foreground/30"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               {/* Description */}
               <FormField
                 control={form.control}
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel className="text-sm font-medium">Description</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="A brief description of your recipe..." 
-                        {...field} 
+                      <Textarea
+                        placeholder="A brief description of your recipe..."
+                        className="rounded-lg border-border/50 focus:border-foreground/30 min-h-[100px]"
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               {/* Image Upload */}
-              <div className="space-y-2">
-                <FormLabel>Recipe Image</FormLabel>
-                <div className="flex items-center gap-4">
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageSelect}
-                    className="max-w-64"
-                  />
-                  
-                  {imagePreview && (
-                    <div className="relative w-20 h-20">
-                      <img 
-                        src={imagePreview} 
-                        alt="Recipe preview" 
-                        className="w-full h-full object-cover rounded-md" 
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute -top-2 -right-2 h-6 w-6"
-                        onClick={() => {
-                          setSelectedImage(null);
-                          setImagePreview(null);
-                        }}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
+              <div className="space-y-3">
+                <FormLabel className="text-sm font-medium">Recipe Image</FormLabel>
+                <div className="flex items-start gap-4">
+                  <label className="flex-1 cursor-pointer">
+                    <div className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
+                      imagePreview ? 'border-foreground/20' : 'border-border/50 hover:border-foreground/20'
+                    }`}>
+                      {imagePreview ? (
+                        <div className="relative">
+                          <img
+                            src={imagePreview}
+                            alt="Recipe preview"
+                            className="w-full h-40 object-cover rounded-lg"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute -top-2 -right-2 h-7 w-7 rounded-full"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setSelectedImage(null);
+                              setImagePreview(null);
+                            }}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="py-4">
+                          <ImageIcon className="h-8 w-8 mx-auto text-muted-foreground/40 mb-2" />
+                          <p className="text-sm text-muted-foreground">Click to upload an image</p>
+                          <p className="text-xs text-muted-foreground/60 mt-1">PNG, JPG up to 10MB</p>
+                        </div>
+                      )}
                     </div>
-                  )}
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageSelect}
+                      className="hidden"
+                    />
+                  </label>
                 </div>
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Prep Time */}
                 <FormField
                   control={form.control}
                   name="prepTime"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Prep Time</FormLabel>
+                      <FormLabel className="text-sm font-medium">Prep Time</FormLabel>
                       <FormControl>
-                        <Input placeholder="20 minutes" {...field} />
+                        <Input
+                          placeholder="20 minutes"
+                          className="rounded-lg border-border/50 focus:border-foreground/30"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                
+
                 {/* Servings */}
                 <FormField
                   control={form.control}
                   name="servings"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Servings</FormLabel>
+                      <FormLabel className="text-sm font-medium">Servings</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
+                        <Input
+                          type="number"
                           min="1"
-                          {...field} 
+                          className="rounded-lg border-border/50 focus:border-foreground/30"
+                          {...field}
                           onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
                         />
                       </FormControl>
@@ -303,22 +335,22 @@ const CreateRecipe = () => {
                   )}
                 />
               </div>
-              
+
               {/* Ingredients */}
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <FormLabel>Ingredients</FormLabel>
+                  <FormLabel className="text-sm font-medium">Ingredients</FormLabel>
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
                     onClick={addIngredient}
-                    className="text-xs"
+                    className="text-xs text-muted-foreground hover:text-foreground"
                   >
                     <Plus className="h-3 w-3 mr-1" /> Add Ingredient
                   </Button>
                 </div>
-                
+
                 {form.watch('ingredients').map((_, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <FormField
@@ -327,7 +359,11 @@ const CreateRecipe = () => {
                       render={({ field }) => (
                         <FormItem className="flex-1">
                           <FormControl>
-                            <Input placeholder="1 cup flour" {...field} />
+                            <Input
+                              placeholder="1 cup flour"
+                              className="rounded-lg border-border/50 focus:border-foreground/30"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -339,32 +375,32 @@ const CreateRecipe = () => {
                       size="icon"
                       onClick={() => removeIngredient(index)}
                       disabled={form.watch('ingredients').length <= 1}
-                      className="h-8 w-8"
+                      className="h-9 w-9 rounded-full text-muted-foreground hover:text-destructive"
                     >
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
               </div>
-              
+
               {/* Instructions */}
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <FormLabel>Instructions</FormLabel>
+                  <FormLabel className="text-sm font-medium">Instructions</FormLabel>
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
                     onClick={addInstruction}
-                    className="text-xs"
+                    className="text-xs text-muted-foreground hover:text-foreground"
                   >
                     <Plus className="h-3 w-3 mr-1" /> Add Step
                   </Button>
                 </div>
-                
+
                 {form.watch('instructions').map((_, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-purple-100 flex items-center justify-center text-xs font-medium text-purple-700">
+                  <div key={index} className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-xs font-medium text-secondary-foreground mt-2">
                       {index + 1}
                     </div>
                     <FormField
@@ -373,9 +409,10 @@ const CreateRecipe = () => {
                       render={({ field }) => (
                         <FormItem className="flex-1">
                           <FormControl>
-                            <Textarea 
-                              placeholder="Mix dry ingredients together..." 
-                              {...field} 
+                            <Textarea
+                              placeholder="Mix dry ingredients together..."
+                              className="rounded-lg border-border/50 focus:border-foreground/30 min-h-[80px]"
+                              {...field}
                             />
                           </FormControl>
                           <FormMessage />
@@ -388,25 +425,27 @@ const CreateRecipe = () => {
                       size="icon"
                       onClick={() => removeInstruction(index)}
                       disabled={form.watch('instructions').length <= 1}
-                      className="h-8 w-8"
+                      className="h-9 w-9 rounded-full text-muted-foreground hover:text-destructive mt-2"
                     >
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
               </div>
-              
-              <div className="pt-4 flex justify-end space-x-2">
+
+              {/* Actions */}
+              <div className="pt-4 flex justify-end gap-3">
                 <Button
                   type="button"
-                  variant="outline"
-                  onClick={() => navigate('/planner')}
+                  variant="ghost"
+                  onClick={() => navigate('/recipes')}
+                  className="rounded-full"
                 >
                   Cancel
                 </Button>
-                <Button 
+                <Button
                   type="submit"
-                  className="bg-purple-600 hover:bg-purple-700"
+                  className="btn-primary rounded-full px-6"
                   disabled={isLoading}
                 >
                   <Save className="h-4 w-4 mr-2" />
@@ -415,7 +454,7 @@ const CreateRecipe = () => {
               </div>
             </form>
           </Form>
-        </Card>
+        </div>
       </div>
     </div>
   );

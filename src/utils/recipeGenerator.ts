@@ -418,3 +418,306 @@ export const verifyTemplateImagesArePublic = async () => {
     return false;
   }
 };
+
+// Extended recipe database with dietary and cuisine tags
+interface CategorizedRecipe extends RecipeTemplate {
+  dietary: string[];
+  cuisine: string;
+}
+
+const categorizedRecipes: CategorizedRecipe[] = [
+  // American Classic
+  {
+    title: "Fluffy Buttermilk Pancakes",
+    description: "Deliciously fluffy pancakes served with maple syrup and fresh berries",
+    prepTime: "20 min",
+    baseIngredients: ["1 1/2 cups flour", "2 tbsp sugar", "1 tsp baking powder", "1 3/4 cups buttermilk", "2 eggs", "3 tbsp butter"],
+    baseInstructions: ["Mix dry ingredients", "Whisk wet ingredients", "Combine and cook on griddle"],
+    imageIndex: 0,
+    dietary: ['vegetarian'],
+    cuisine: 'american'
+  },
+  {
+    title: "Classic Eggs Benedict",
+    description: "Perfectly poached eggs on English muffins with hollandaise sauce",
+    prepTime: "25 min",
+    baseIngredients: ["English muffins", "4 eggs", "Canadian bacon", "Butter", "Lemon juice"],
+    baseInstructions: ["Make hollandaise", "Poach eggs", "Toast muffins", "Assemble and serve"],
+    imageIndex: 3,
+    dietary: [],
+    cuisine: 'american'
+  },
+  {
+    title: "Cinnamon French Toast",
+    description: "Golden crispy French toast with warm cinnamon and maple syrup",
+    prepTime: "15 min",
+    baseIngredients: ["Brioche bread", "3 eggs", "1 cup milk", "1 tsp cinnamon", "Butter", "Maple syrup"],
+    baseInstructions: ["Whisk eggs, milk, cinnamon", "Dip bread", "Cook until golden", "Serve with syrup"],
+    imageIndex: 5,
+    dietary: ['vegetarian'],
+    cuisine: 'american'
+  },
+  // Health-Focused
+  {
+    title: "Acai Power Bowl",
+    description: "Antioxidant-rich acai smoothie bowl with fresh toppings",
+    prepTime: "10 min",
+    baseIngredients: ["Frozen acai", "1 banana", "1/2 cup berries", "Almond milk", "Granola", "Coconut flakes"],
+    baseInstructions: ["Blend acai, banana, berries, milk", "Pour into bowl", "Add toppings"],
+    imageIndex: 2,
+    dietary: ['vegan', 'gluten-free', 'dairy-free'],
+    cuisine: 'healthy'
+  },
+  {
+    title: "Green Goddess Smoothie Bowl",
+    description: "Nutrient-packed green smoothie with spinach and tropical fruits",
+    prepTime: "8 min",
+    baseIngredients: ["2 cups spinach", "1 banana", "1/2 cup mango", "Coconut water", "Chia seeds", "Hemp hearts"],
+    baseInstructions: ["Blend spinach, banana, mango, coconut water", "Top with seeds"],
+    imageIndex: 2,
+    dietary: ['vegan', 'gluten-free', 'dairy-free'],
+    cuisine: 'healthy'
+  },
+  {
+    title: "Overnight Chia Pudding",
+    description: "No-cook breakfast pudding with chia seeds and fresh fruit",
+    prepTime: "5 min + overnight",
+    baseIngredients: ["3 tbsp chia seeds", "1 cup coconut milk", "1 tbsp maple syrup", "Vanilla", "Fresh fruit"],
+    baseInstructions: ["Mix chia with milk and sweetener", "Refrigerate overnight", "Top with fruit"],
+    imageIndex: 6,
+    dietary: ['vegan', 'gluten-free', 'dairy-free'],
+    cuisine: 'healthy'
+  },
+  {
+    title: "Protein Oatmeal Bowl",
+    description: "Hearty oatmeal with nut butter and banana slices",
+    prepTime: "10 min",
+    baseIngredients: ["1 cup oats", "2 cups water", "1 banana", "2 tbsp almond butter", "Cinnamon", "Honey"],
+    baseInstructions: ["Cook oats with water", "Top with banana and almond butter", "Drizzle with honey"],
+    imageIndex: 4,
+    dietary: ['vegan', 'dairy-free'],
+    cuisine: 'healthy'
+  },
+  // Mediterranean
+  {
+    title: "Greek Yogurt Parfait",
+    description: "Creamy Greek yogurt layered with honey, nuts, and fresh berries",
+    prepTime: "5 min",
+    baseIngredients: ["2 cups Greek yogurt", "1/4 cup honey", "1/2 cup granola", "Mixed berries", "Chopped walnuts"],
+    baseInstructions: ["Layer yogurt in glass", "Add granola and berries", "Drizzle with honey", "Top with walnuts"],
+    imageIndex: 6,
+    dietary: ['vegetarian', 'gluten-free'],
+    cuisine: 'mediterranean'
+  },
+  {
+    title: "Avocado Toast Mediterranean",
+    description: "Sourdough topped with avocado, feta, tomatoes, and herbs",
+    prepTime: "10 min",
+    baseIngredients: ["Sourdough bread", "2 avocados", "Cherry tomatoes", "Feta cheese", "Olive oil", "Fresh herbs"],
+    baseInstructions: ["Toast bread", "Mash avocado with olive oil", "Top with tomatoes and feta", "Garnish with herbs"],
+    imageIndex: 1,
+    dietary: ['vegetarian'],
+    cuisine: 'mediterranean'
+  },
+  {
+    title: "Shakshuka",
+    description: "Eggs poached in spiced tomato sauce with bell peppers",
+    prepTime: "25 min",
+    baseIngredients: ["4 eggs", "Tomato sauce", "Bell peppers", "Onion", "Cumin", "Paprika", "Fresh parsley"],
+    baseInstructions: ["Sauté peppers and onion", "Add tomatoes and spices", "Create wells and crack eggs", "Cover and cook until set"],
+    imageIndex: 3,
+    dietary: ['vegetarian', 'gluten-free'],
+    cuisine: 'mediterranean'
+  },
+  // European
+  {
+    title: "French Crepes",
+    description: "Delicate thin pancakes with Nutella and fresh strawberries",
+    prepTime: "20 min",
+    baseIngredients: ["1 cup flour", "2 eggs", "1/2 cup milk", "Butter", "Nutella", "Fresh strawberries"],
+    baseInstructions: ["Make batter", "Cook thin crepes", "Fill with Nutella", "Top with strawberries"],
+    imageIndex: 0,
+    dietary: ['vegetarian'],
+    cuisine: 'european'
+  },
+  {
+    title: "Belgian Waffles",
+    description: "Light and crispy waffles with whipped cream and berries",
+    prepTime: "25 min",
+    baseIngredients: ["2 cups flour", "3 eggs", "1/2 cup butter", "2 cups milk", "Whipped cream", "Fresh berries"],
+    baseInstructions: ["Make batter", "Cook in waffle iron", "Top with cream and berries"],
+    imageIndex: 0,
+    dietary: ['vegetarian'],
+    cuisine: 'european'
+  },
+  {
+    title: "Croissant with Jam",
+    description: "Buttery croissant served with artisan jam and fresh fruit",
+    prepTime: "5 min",
+    baseIngredients: ["Fresh croissants", "Artisan jam", "Butter", "Fresh fruit", "Powdered sugar"],
+    baseInstructions: ["Warm croissants", "Serve with butter and jam", "Garnish with fruit"],
+    imageIndex: 7,
+    dietary: ['vegetarian'],
+    cuisine: 'european'
+  },
+  // Asian
+  {
+    title: "Japanese Tamagoyaki",
+    description: "Sweet rolled omelette with miso soup and rice",
+    prepTime: "15 min",
+    baseIngredients: ["4 eggs", "1 tbsp sugar", "1 tbsp soy sauce", "Dashi", "Rice", "Miso paste"],
+    baseInstructions: ["Mix eggs with seasonings", "Cook in layers, rolling as you go", "Serve with rice and miso"],
+    imageIndex: 3,
+    dietary: ['gluten-free', 'dairy-free'],
+    cuisine: 'asian'
+  },
+  {
+    title: "Congee with Toppings",
+    description: "Comforting rice porridge with savory toppings",
+    prepTime: "30 min",
+    baseIngredients: ["1 cup rice", "8 cups water", "Ginger", "Green onions", "Soy sauce", "Sesame oil"],
+    baseInstructions: ["Simmer rice in water until porridge consistency", "Season with ginger", "Top with green onions and drizzle sesame oil"],
+    imageIndex: 4,
+    dietary: ['vegan', 'gluten-free', 'dairy-free'],
+    cuisine: 'asian'
+  },
+  // Vegan options
+  {
+    title: "Tofu Scramble",
+    description: "Seasoned tofu scramble with vegetables and spices",
+    prepTime: "15 min",
+    baseIngredients: ["1 block firm tofu", "Turmeric", "Nutritional yeast", "Bell peppers", "Spinach", "Onion"],
+    baseInstructions: ["Crumble tofu", "Sauté with vegetables", "Season with turmeric and nutritional yeast"],
+    imageIndex: 3,
+    dietary: ['vegan', 'gluten-free', 'dairy-free'],
+    cuisine: 'healthy'
+  },
+  {
+    title: "Avocado Toast Deluxe",
+    description: "Loaded avocado toast with seeds and microgreens",
+    prepTime: "8 min",
+    baseIngredients: ["Whole grain bread", "2 avocados", "Lemon juice", "Hemp seeds", "Microgreens", "Red pepper flakes"],
+    baseInstructions: ["Toast bread", "Mash avocado with lemon", "Spread on toast", "Top with seeds and greens"],
+    imageIndex: 1,
+    dietary: ['vegan', 'dairy-free'],
+    cuisine: 'healthy'
+  },
+  // Low-carb options
+  {
+    title: "Keto Egg Muffins",
+    description: "Protein-packed egg muffins with cheese and vegetables",
+    prepTime: "25 min",
+    baseIngredients: ["6 eggs", "1/2 cup cheese", "Spinach", "Bell peppers", "Bacon bits", "Heavy cream"],
+    baseInstructions: ["Whisk eggs with cream", "Add vegetables and cheese", "Bake in muffin tin until set"],
+    imageIndex: 3,
+    dietary: ['low-carb', 'gluten-free'],
+    cuisine: 'american'
+  },
+  {
+    title: "Vegetable Frittata",
+    description: "Italian-style baked egg dish with seasonal vegetables",
+    prepTime: "25 min",
+    baseIngredients: ["6 eggs", "1/4 cup milk", "Bell peppers", "Spinach", "Onion", "Cheese", "Herbs"],
+    baseInstructions: ["Sauté vegetables", "Pour beaten eggs over", "Bake until golden"],
+    imageIndex: 3,
+    dietary: ['vegetarian', 'low-carb', 'gluten-free'],
+    cuisine: 'mediterranean'
+  }
+];
+
+// Filter recipes based on preferences
+const filterRecipes = (
+  dietary: string[],
+  cuisine: string
+): CategorizedRecipe[] => {
+  return categorizedRecipes.filter(recipe => {
+    // Check cuisine (any matches everything)
+    const cuisineMatch = cuisine === 'any' || recipe.cuisine === cuisine;
+
+    // Check dietary preferences
+    const dietaryMatch = dietary.includes('none') ||
+      dietary.every(pref => recipe.dietary.includes(pref));
+
+    return cuisineMatch && dietaryMatch;
+  });
+};
+
+// Generate a batch of unique recipes for meal planning
+export const generateMealPlan = async (
+  daysToplan: number,
+  servings: number,
+  dietaryPreferences: string[] = ['none'],
+  cuisineStyle: string = 'any'
+): Promise<Recipe[]> => {
+  const recipes: Recipe[] = [];
+  const usedTitles = new Set<string>();
+
+  // Filter available recipes based on preferences
+  let availableRecipes = filterRecipes(dietaryPreferences, cuisineStyle);
+
+  // If no recipes match, fall back to all recipes
+  if (availableRecipes.length === 0) {
+    console.warn('No recipes match preferences, using all recipes');
+    availableRecipes = categorizedRecipes;
+  }
+
+  for (let i = 0; i < daysToplan; i++) {
+    // Find a recipe that hasn't been used
+    const unusedRecipes = availableRecipes.filter(r => !usedTitles.has(r.title));
+
+    // If we've used all recipes, reset
+    const recipesToChooseFrom = unusedRecipes.length > 0 ? unusedRecipes : availableRecipes;
+
+    // Pick a random recipe
+    const randomIndex = Math.floor(Math.random() * recipesToChooseFrom.length);
+    const template = recipesToChooseFrom[randomIndex];
+
+    usedTitles.add(template.title);
+
+    // Create the recipe
+    const recipe: Recipe = {
+      id: Date.now() + i,
+      title: template.title,
+      description: template.description,
+      prepTime: template.prepTime,
+      servings,
+      image: breakfastImages[template.imageIndex],
+      ingredients: template.baseIngredients,
+      instructions: template.baseInstructions,
+      time: `${7 + Math.floor(Math.random() * 2)}:${['00', '15', '30', '45'][Math.floor(Math.random() * 4)]} AM`,
+      status: 'planned'
+    };
+
+    recipes.push(recipe);
+  }
+
+  return recipes;
+};
+
+// Generate a single recipe with preferences
+export const generateRecipeWithPreferences = (
+  servings: number = 2,
+  dietaryPreferences: string[] = ['none'],
+  cuisineStyle: string = 'any'
+): Recipe => {
+  let availableRecipes = filterRecipes(dietaryPreferences, cuisineStyle);
+
+  if (availableRecipes.length === 0) {
+    availableRecipes = categorizedRecipes;
+  }
+
+  const randomIndex = Math.floor(Math.random() * availableRecipes.length);
+  const template = availableRecipes[randomIndex];
+
+  return {
+    id: Date.now(),
+    title: template.title,
+    description: template.description,
+    prepTime: template.prepTime,
+    servings,
+    image: breakfastImages[template.imageIndex],
+    ingredients: template.baseIngredients,
+    instructions: template.baseInstructions,
+    time: `${7 + Math.floor(Math.random() * 2)}:${['00', '15', '30', '45'][Math.floor(Math.random() * 4)]} AM`,
+  };
+};

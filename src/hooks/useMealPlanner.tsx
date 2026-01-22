@@ -505,13 +505,85 @@ export const useMealPlanner = (refreshTrigger = 0) => {
     });
   };
 
+  // Batch add multiple recipes starting from a date
+  const addBatchRecipesToPlanner = async (recipes: Recipe[], startDate: Date) => {
+    const updates: Record<string, Recipe[]> = {};
+
+    for (let i = 0; i < recipes.length; i++) {
+      const date = new Date(startDate);
+      date.setDate(date.getDate() + i);
+      const dateKey = date.toISOString().split('T')[0];
+
+      // Skip if there's already a meal on this day
+      if (plannedMeals[dateKey] && plannedMeals[dateKey].length > 0) {
+        continue;
+      }
+
+      const newMeal: Recipe = {
+        ...recipes[i],
+        status: 'planned'
+      };
+
+      if (user && !useLocalStorage) {
+        try {
+          const recipeId = typeof recipes[i].id === 'number' ?
+            await ensureRecipeExists(recipes[i]) : recipes[i].id;
+
+          await supabase.from('planned_meals').insert({
+            id: uuidv4(),
+            user_id: user.id,
+            recipe_id: recipeId,
+            date: dateKey,
+            time: newMeal.time,
+            status: 'planned'
+          });
+        } catch (error) {
+          console.error('Error adding recipe to planner:', error);
+        }
+      }
+
+      updates[dateKey] = [newMeal];
+    }
+
+    // Update state in batch
+    setPlannedMeals(prev => {
+      const updated = { ...prev, ...updates };
+      if (!user || useLocalStorage) {
+        localStorage.setItem('plannedMeals', JSON.stringify(updated));
+      }
+      return updated;
+    });
+
+    toast({
+      title: "Meal Plan Generated",
+      description: `Added ${Object.keys(updates).length} meals to your plan`,
+      duration: 3000,
+    });
+  };
+
+  // Check if planner is empty (no meals planned for next 7 days)
+  const isPlannerEmpty = (): boolean => {
+    const today = new Date();
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today);
+      date.setDate(date.getDate() + i);
+      const dateKey = date.toISOString().split('T')[0];
+      if (plannedMeals[dateKey] && plannedMeals[dateKey].length > 0) {
+        return false;
+      }
+    }
+    return true;
+  };
+
   return {
     plannedMeals,
     likedRecipes,
     isLoading,
     addRecipeToPlanner,
+    addBatchRecipesToPlanner,
     toggleMealStatus,
     removeMeal,
-    forceRefresh
+    forceRefresh,
+    isPlannerEmpty
   };
 };

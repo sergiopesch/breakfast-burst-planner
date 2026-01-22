@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMealPlanner, Recipe } from '@/hooks/useMealPlanner';
@@ -10,7 +10,10 @@ import PlannerLayout from '@/components/PlannerLayout';
 import PlannerHeader from '@/components/PlannerHeader';
 import CalendarView from '@/components/CalendarView';
 import FavoritesSection from '@/components/FavoritesSection';
-import { generateRecipe } from '@/utils/recipeGenerator';
+import MealPlannerModal, { MealPlanPreferences } from '@/components/MealPlannerModal';
+import { generateRecipe, generateMealPlan } from '@/utils/recipeGenerator';
+import { Button } from '@/components/ui/button';
+import { Sparkles, Calendar } from 'lucide-react';
 
 type ViewType = 'day' | 'week' | 'month';
 
@@ -19,6 +22,8 @@ const Planner = () => {
   const [view, setView] = useState<ViewType>('day');
   const [showFavorites, setShowFavorites] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [showPlannerModal, setShowPlannerModal] = useState(false);
+  const [hasShownWelcome, setHasShownWelcome] = useState(false);
   const { toast } = useToast();
 
   // Get data from our custom hook
@@ -27,11 +32,26 @@ const Planner = () => {
     likedRecipes,
     isLoading,
     addRecipeToPlanner,
+    addBatchRecipesToPlanner,
     toggleMealStatus,
-    removeMeal
+    removeMeal,
+    isPlannerEmpty
   } = useMealPlanner(refreshKey);
 
   const viewDates = getViewDates(view, date);
+
+  // Show welcome modal if planner is empty (only once per session)
+  useEffect(() => {
+    if (!isLoading && !hasShownWelcome) {
+      const timer = setTimeout(() => {
+        if (isPlannerEmpty()) {
+          setShowPlannerModal(true);
+        }
+        setHasShownWelcome(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, hasShownWelcome, isPlannerEmpty]);
 
   const handleDateSelect = (selectedDate: Date | undefined) => {
     if (selectedDate) {
@@ -86,14 +106,40 @@ const Planner = () => {
     setRefreshKey(prev => prev + 1);
   };
 
+  const handleGenerateMealPlan = async (preferences: MealPlanPreferences) => {
+    const recipes = await generateMealPlan(
+      preferences.daysToplan,
+      preferences.servings,
+      preferences.dietaryPreferences,
+      preferences.cuisineStyle
+    );
+
+    await addBatchRecipesToPlanner(recipes, new Date());
+    setRefreshKey(prev => prev + 1);
+
+    // Switch to week view to show the generated plan
+    if (preferences.daysToplan > 1) {
+      setView('week');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 md:px-6 py-8 max-w-7xl">
         <div className="space-y-8">
-          <PlannerHeader
-            title="Breakfast Planner"
-            subtitle="Plan your morning meals with ease"
-          />
+          <div className="flex items-start justify-between">
+            <PlannerHeader
+              title="Breakfast Planner"
+              subtitle="Plan your morning meals with ease"
+            />
+            <Button
+              onClick={() => setShowPlannerModal(true)}
+              className="btn-primary rounded-full hidden md:flex"
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              Generate Plan
+            </Button>
+          </div>
 
           <PlannerLayout
             sidebar={
@@ -105,6 +151,17 @@ const Planner = () => {
                   onDateSelect={handleDateSelect}
                   onViewChange={handleViewChange}
                 />
+
+                {/* Quick generate button for mobile */}
+                <div className="md:hidden">
+                  <Button
+                    onClick={() => setShowPlannerModal(true)}
+                    className="btn-primary rounded-full w-full"
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Generate Meal Plan
+                  </Button>
+                </div>
 
                 <FavoritesSection
                   showFavorites={showFavorites}
@@ -188,6 +245,29 @@ const Planner = () => {
                         )}
                       </AnimatePresence>
                     </div>
+
+                    {/* Empty state CTA */}
+                    {isPlannerEmpty() && view === 'day' && getMealsForDate(date).length === 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="mt-6 text-center p-8 bg-secondary/30 rounded-xl border border-border/30"
+                      >
+                        <Calendar className="h-10 w-10 mx-auto text-muted-foreground/40 mb-4" />
+                        <h3 className="text-lg font-medium mb-2">Start Your Week Right</h3>
+                        <p className="text-muted-foreground text-sm mb-6 max-w-md mx-auto">
+                          Let us help you plan delicious breakfasts for the whole week based on your preferences.
+                        </p>
+                        <Button
+                          onClick={() => setShowPlannerModal(true)}
+                          className="btn-primary rounded-full"
+                        >
+                          <Sparkles className="h-4 w-4 mr-2" />
+                          Generate Weekly Plan
+                        </Button>
+                      </motion.div>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -195,6 +275,13 @@ const Planner = () => {
           />
         </div>
       </div>
+
+      {/* Meal Planning Modal */}
+      <MealPlannerModal
+        open={showPlannerModal}
+        onOpenChange={setShowPlannerModal}
+        onGenerate={handleGenerateMealPlan}
+      />
     </div>
   );
 };

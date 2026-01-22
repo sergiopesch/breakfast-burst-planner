@@ -20,11 +20,12 @@ npm run lint
 
 ## Project Context
 
-Breakfast Burst Planner is a breakfast-focused meal planning app. Users can:
+Breakfast Burst Planner is a breakfast-focused meal planning app that works **without requiring login**. Users can:
 - Discover breakfast recipes with a "Surprise me" feature
-- Save favorite recipes
+- Save favorite recipes (localStorage for anonymous, Supabase for logged-in)
 - Plan weekly breakfast meals on a calendar
 - Create custom recipes
+- Optionally sign in to sync data across devices
 
 ## Architecture Overview
 
@@ -81,18 +82,42 @@ Available utility classes (defined in `src/index.css`):
 
 ### Authentication Pattern
 
+The app works without login. Use authentication conditionally:
+
 ```tsx
 import { useAuth } from '@/hooks/useAuth';
 
 const MyComponent = () => {
   const { user, signIn, signOut } = useAuth();
 
-  if (!user) {
-    return <Navigate to="/login" />;
-  }
+  // Most features work for both anonymous and logged-in users
+  const saveData = () => {
+    if (user) {
+      // Save to Supabase for logged-in users
+      await supabase.from('table').insert(data);
+    } else {
+      // Save to localStorage for anonymous users
+      localStorage.setItem('key', JSON.stringify(data));
+      window.dispatchEvent(new Event('storage')); // Trigger updates
+    }
+  };
 
-  return <div>Welcome, {user.email}</div>;
+  return (
+    <div>
+      {user ? `Welcome, ${user.email}` : 'Welcome, Guest!'}
+    </div>
+  );
 };
+```
+
+Only use `ProtectedRoute` for user-specific pages like `/profile`:
+
+```tsx
+// Protected (requires login)
+<Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+
+// Public (works without login)
+<Route path="/planner" element={<Layout><Planner /></Layout>} />
 ```
 
 ### Data Fetching Pattern
@@ -167,13 +192,18 @@ toast({
 1. Create page component in `src/pages/NewPage.tsx`
 2. Add route in `src/App.tsx`:
 ```tsx
+// Public page (recommended - works without login)
+<Route path="/new-page" element={<Layout><NewPage /></Layout>} />
+
+// Protected page (only if it requires user-specific data)
 <Route path="/new-page" element={
   <ProtectedRoute>
-    <NewPage />
+    <Layout><NewPage /></Layout>
   </ProtectedRoute>
 } />
 ```
 3. Add navigation link in `MainNav.tsx` if needed
+4. Ensure the page handles both logged-in and anonymous users via localStorage fallback
 
 ## File Locations Reference
 

@@ -91,15 +91,6 @@ const CreateRecipe = () => {
   };
 
   const onSubmit = async (values: FormValues) => {
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to save recipes.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setIsLoading(true);
 
     try {
@@ -112,48 +103,75 @@ const CreateRecipe = () => {
       let imageUrl = null;
       let imagePath = null;
 
-      // Upload image if selected
-      if (selectedImage) {
-        const { path, url, error } = await uploadRecipeImage(selectedImage, user.id);
+      // If user is logged in, save to Supabase
+      if (user) {
+        // Upload image if selected
+        if (selectedImage) {
+          const { path, url, error } = await uploadRecipeImage(selectedImage, user.id);
+
+          if (error) {
+            console.error('Error uploading image:', error);
+            toast({
+              title: "Image Upload Failed",
+              description: "Could not upload image. Recipe will be saved without an image.",
+              variant: "destructive"
+            });
+          } else {
+            imageUrl = url;
+            imagePath = path;
+          }
+        }
+
+        // Save recipe to database
+        const { error } = await supabase.from('recipes').insert({
+          id: recipeId,
+          user_id: user.id,
+          title: values.title,
+          description: values.description,
+          prep_time: values.prepTime,
+          servings: values.servings,
+          ingredients: filteredIngredients,
+          instructions: filteredInstructions,
+          image_url: imageUrl,
+          image_path: imagePath
+        });
 
         if (error) {
-          console.error('Error uploading image:', error);
-          toast({
-            title: "Image Upload Failed",
-            description: "Could not upload image. Recipe will be saved without an image.",
-            variant: "destructive"
-          });
-        } else {
-          imageUrl = url;
-          imagePath = path;
+          throw error;
         }
-      }
+      } else {
+        // Save to localStorage for anonymous users
+        const newRecipe = {
+          id: recipeId,
+          title: values.title,
+          description: values.description,
+          prepTime: values.prepTime,
+          servings: values.servings,
+          ingredients: filteredIngredients,
+          instructions: filteredInstructions,
+          image: imagePreview || null, // Use data URL for local preview
+        };
 
-      // Save recipe to database
-      const { error } = await supabase.from('recipes').insert({
-        id: recipeId,
-        user_id: user.id,
-        title: values.title,
-        description: values.description,
-        prep_time: values.prepTime,
-        servings: values.servings,
-        ingredients: filteredIngredients,
-        instructions: filteredInstructions,
-        image_url: imageUrl,
-        image_path: imagePath
-      });
+        const existingRecipes = JSON.parse(localStorage.getItem('customRecipes') || '[]');
+        localStorage.setItem('customRecipes', JSON.stringify([...existingRecipes, newRecipe]));
 
-      if (error) {
-        throw error;
+        // Also add to liked recipes so it shows in favorites
+        const likedRecipes = JSON.parse(localStorage.getItem('likedRecipes') || '[]');
+        localStorage.setItem('likedRecipes', JSON.stringify([...likedRecipes, newRecipe]));
+
+        // Trigger storage event
+        window.dispatchEvent(new Event('storage'));
       }
 
       toast({
         title: "Recipe Saved",
-        description: "Your recipe has been saved successfully!",
+        description: user
+          ? "Your recipe has been saved to your account!"
+          : "Your recipe has been saved locally. Sign in to sync across devices.",
       });
 
-      // Navigate to planner or recipes list
-      navigate('/planner');
+      // Navigate to recipes list
+      navigate('/recipes');
     } catch (error) {
       console.error('Error saving recipe:', error);
       toast({
@@ -172,11 +190,11 @@ const CreateRecipe = () => {
         {/* Header */}
         <div className="mb-8">
           <Link
-            to="/planner"
+            to="/recipes"
             className="group inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mb-6"
           >
             <ArrowLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />
-            Back to Planner
+            Back to Recipes
           </Link>
 
           <span className="text-xs font-medium tracking-widest uppercase text-muted-foreground mb-2 block">
@@ -420,7 +438,7 @@ const CreateRecipe = () => {
                 <Button
                   type="button"
                   variant="ghost"
-                  onClick={() => navigate('/planner')}
+                  onClick={() => navigate('/recipes')}
                   className="rounded-full"
                 >
                   Cancel

@@ -322,6 +322,34 @@
   @apply focus:outline-none focus:ring-2 focus:ring-foreground/20 focus:ring-offset-2 focus:ring-offset-background;
 }
 
+/* Global focus-visible styles for keyboard navigation (WCAG 2.4.7) */
+*:focus-visible {
+  @apply outline-none ring-2 ring-foreground/30 ring-offset-2 ring-offset-background;
+}
+
+/* Remove focus ring for mouse users, keep for keyboard */
+*:focus:not(:focus-visible) {
+  @apply outline-none ring-0;
+}
+
+/* Button focus states */
+button:focus-visible,
+[role="button"]:focus-visible {
+  @apply ring-2 ring-foreground/40 ring-offset-2 ring-offset-background;
+}
+
+/* Link focus states */
+a:focus-visible {
+  @apply rounded-sm ring-2 ring-foreground/30 ring-offset-2 ring-offset-background;
+}
+
+/* Input focus states */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  @apply ring-2 ring-foreground/20 ring-offset-0 border-foreground/30;
+}
+
 /* Scrollbar styling - minimal */
 ::-webkit-scrollbar {
   width: 6px;
@@ -457,4 +485,68 @@
 
 .tag-pill:hover {
   @apply bg-secondary/80;
+}
+
+/* Skip to main content link for accessibility */
+.skip-link {
+  @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100];
+  @apply bg-foreground text-background px-4 py-2 rounded-lg font-medium;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-float,
+  .animate-pulse-soft,
+  .shimmer {
+    animation: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --border: 25 20% 40%;
+    --muted-foreground: 25 15% 35%;
+  }
+
+  .dark {
+    --border: 30 15% 50%;
+    --muted-foreground: 30 10% 70%;
+  }
+}
+
+/* Dark mode shimmer */
+.dark .shimmer {
+  background: linear-gradient(
+    90deg,
+    hsl(25 15% 15%) 0%,
+    hsl(25 15% 20%) 50%,
+    hsl(25 15% 15%) 100%
+  );
+}
+
+/* Elegant shadow utility */
+.shadow-elegant {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.shadow-elegant-lg {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.dark .shadow-elegant {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dark .shadow-elegant-lg {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.25);
 }

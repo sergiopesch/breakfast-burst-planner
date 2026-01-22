@@ -10,7 +10,7 @@ import PlannerLayout from '@/components/PlannerLayout';
 import PlannerHeader from '@/components/PlannerHeader';
 import CalendarView from '@/components/CalendarView';
 import FavoritesSection from '@/components/FavoritesSection';
-import { generateRecipe } from '@/utils/recipeGenerator';
+import { generateAIRecipe, RecipeType } from '@/services/aiRecipeService';
 
 type ViewType = 'day' | 'week' | 'month';
 
@@ -65,13 +65,13 @@ const Planner = () => {
     setRefreshKey(prev => prev + 1);
   };
 
-  const handleGenerateRecipe = (servings: number) => {
+  const handleGenerateRecipe = async (servings: number, recipeType: RecipeType) => {
     const currentMeals = getMealsForDate(date);
     if (currentMeals.length > 0) {
       return;
     }
 
-    const newRecipe = generateRecipe(servings);
+    const newRecipe = await generateAIRecipe(recipeType, servings);
     addRecipeToPlanner(newRecipe, date);
     setRefreshKey(prev => prev + 1);
   };

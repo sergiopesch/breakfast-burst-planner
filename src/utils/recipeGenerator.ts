@@ -8,7 +8,7 @@ const BREAKFAST_IMAGE_URLS = {
   pancakes: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=480&q=80&fit=crop",
   avocadoToast: "https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?w=480&q=80&fit=crop",
   smoothie: "https://images.unsplash.com/photo-1638176066666-ffb2f013c7dd?w=480&q=80&fit=crop",
-  eggs: "https://images.unsplash.com/photo-1482049016gy789-2d9c246f884f?w=480&q=80&fit=crop",
+  eggs: "https://images.unsplash.com/photo-1482049016530-d9c246f884f7?w=480&q=80&fit=crop",
   oatmeal: "https://images.unsplash.com/photo-1517673400267-0251440c45dc?w=480&q=80&fit=crop",
   frenchToast: "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=480&q=80&fit=crop",
   granola: "https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=480&q=80&fit=crop",
@@ -28,7 +28,7 @@ const breakfastImages = [
   BREAKFAST_IMAGE_URLS.pancakes,      // Pancakes
   BREAKFAST_IMAGE_URLS.avocadoToast,  // Avocado toast
   BREAKFAST_IMAGE_URLS.smoothie,      // Smoothie
-  BREAKFAST_IMAGE_URLS.sandwich,      // Eggs (using sandwich as backup)
+  BREAKFAST_IMAGE_URLS.eggs,          // Eggs
   BREAKFAST_IMAGE_URLS.oatmeal,       // Oatmeal
   BREAKFAST_IMAGE_URLS.frenchToast,   // French toast
   BREAKFAST_IMAGE_URLS.granola,       // Granola bowl
@@ -241,7 +241,7 @@ export const uploadTemplateImagesToSupabase = async () => {
     },
     {
       filename: "eggs.jpg",
-      url: BREAKFAST_IMAGE_URLS.sandwich // Using sandwich image for eggs benedict style
+      url: BREAKFAST_IMAGE_URLS.eggs
     },
     {
       filename: "oatmeal.jpg",

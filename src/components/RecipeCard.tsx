@@ -297,10 +297,10 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <motion.div 
+      <motion.div
         className="group cursor-pointer"
-        whileHover={{ y: -5 }}
-        transition={{ type: "spring", stiffness: 300 }}
+        whileHover={{ y: -6 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
         onClick={() => {
           if (onClick) {
             onClick();
@@ -309,17 +309,19 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick }) => {
           }
         }}
       >
-        <div className="neumorphic overflow-hidden rounded-xl transition-all duration-300 hover:shadow-[8px_8px_20px_rgba(0,0,0,0.1),-8px_-8px_20px_rgba(255,255,255,0.8)] dark:hover:shadow-[8px_8px_20px_rgba(0,0,0,0.3),-8px_-8px_20px_rgba(255,255,255,0.05)]">
-          <div className="relative aspect-square max-h-[240px] w-full overflow-hidden">
+        <div className="card-hover neumorphic overflow-hidden rounded-2xl">
+          <div className="relative aspect-[4/3] max-h-[280px] w-full overflow-hidden">
             <ImageLoader
               src={recipe.image}
               alt={recipe.title}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-              fallbackClassName="h-full w-full flex items-center justify-center bg-gray-100"
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+              fallbackClassName="h-full w-full flex items-center justify-center bg-gradient-to-br from-brand-purple-lighter to-brand-warm-lighter shimmer"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-            <button 
-              className={`absolute right-3 top-3 rounded-full ${isLiked ? 'bg-[#4F2D9E] text-white' : 'bg-white/90 text-[#4F2D9E]'} backdrop-blur-sm p-2 transition-transform hover:scale-110`}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
+
+            {/* Like button */}
+            <button
+              className={`absolute right-4 top-4 rounded-xl ${isLiked ? 'bg-brand-purple text-white shadow-glow' : 'bg-white/90 text-brand-purple hover:bg-white'} backdrop-blur-md p-2.5 transition-all duration-300 hover:scale-110 active:scale-95`}
               onClick={handleLike}
               disabled={uploadingImage}
               aria-label={isLiked ? "Remove from favorites" : "Add to favorites"}
@@ -327,80 +329,113 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onClick }) => {
               {uploadingImage ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
-                <Heart className={`h-5 w-5 ${isLiked ? 'fill-white' : ''}`} />
+                <Heart className={`h-5 w-5 transition-all duration-300 ${isLiked ? 'fill-white scale-110' : 'group-hover:scale-110'}`} />
               )}
             </button>
-          </div>
-          <div className="p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <Clock className="h-4 w-4 text-[#4F2D9E]" />
-              <span className="text-sm text-gray-600">{recipe.prepTime}</span>
+
+            {/* Prep time badge */}
+            <div className="absolute left-4 bottom-4 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/90 backdrop-blur-md text-sm font-medium text-foreground shadow-soft">
+              <Clock className="h-3.5 w-3.5 text-brand-purple" />
+              <span>{recipe.prepTime}</span>
             </div>
-            <h2 className="mt-2 text-lg font-medium text-[#4F2D9E] flex items-center">
-              <Coffee className="h-4 w-4 mr-2" />
+          </div>
+
+          <div className="p-5">
+            <h2 className="text-xl font-semibold text-foreground group-hover:text-brand-purple transition-colors duration-300 flex items-center gap-2">
+              <Coffee className="h-5 w-5 text-brand-purple" />
               {recipe.title}
             </h2>
-            <p className="mt-1 text-sm text-gray-600 line-clamp-2">{recipe.description}</p>
+            <p className="mt-2 text-sm text-muted-foreground line-clamp-2 leading-relaxed">{recipe.description}</p>
+
+            {/* Tags/Quick info */}
+            <div className="mt-4 flex items-center gap-2">
+              <span className="px-2.5 py-1 rounded-full bg-brand-purple-lighter/60 text-brand-purple text-xs font-medium">
+                Breakfast
+              </span>
+              <span className="px-2.5 py-1 rounded-full bg-brand-warm-lighter text-brand-warm text-xs font-medium">
+                Easy
+              </span>
+            </div>
           </div>
         </div>
       </motion.div>
 
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogTitle className="text-xl font-semibold text-[#4F2D9E] flex items-center">
-          <Coffee className="h-5 w-5 mr-2" />
-          {recipe.title}
-        </DialogTitle>
-        <DialogDescription>
-          {recipe.description}
-        </DialogDescription>
-        
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="space-y-4 p-4"
-        >
+      <DialogContent className="sm:max-w-[500px] glass border-white/30 p-0 overflow-hidden">
+        <div className="relative">
           {recipe.image && (
-            <div className="rounded-lg overflow-hidden">
-              <ImageLoader 
-                src={recipe.image} 
+            <div className="relative h-48 overflow-hidden">
+              <ImageLoader
+                src={recipe.image}
                 alt={recipe.title}
-                className="w-full h-auto"
+                className="w-full h-full object-cover"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"></div>
             </div>
           )}
-          
-          <div className="space-y-2">
-            <h3 className="font-medium text-[#4F2D9E]">Ingredients:</h3>
-            <ul className="list-inside list-disc space-y-1 text-gray-600">
-              {recipe.ingredients?.map((ingredient, index) => (
-                <motion.li 
-                  key={index} 
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  {ingredient}
-                </motion.li>
-              ))}
-            </ul>
+
+          <div className="p-6 -mt-8 relative">
+            <DialogTitle className="text-2xl font-bold text-foreground flex items-center gap-2">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-brand-purple to-brand-purple-light shadow-soft">
+                <Coffee className="h-5 w-5 text-white" />
+              </div>
+              {recipe.title}
+            </DialogTitle>
+            <DialogDescription className="mt-2 text-muted-foreground">
+              {recipe.description}
+            </DialogDescription>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-5 mt-6"
+            >
+              <div className="space-y-3">
+                <h3 className="font-semibold text-brand-purple flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-purple"></span>
+                  Ingredients
+                </h3>
+                <ul className="space-y-2">
+                  {recipe.ingredients?.map((ingredient, index) => (
+                    <motion.li
+                      key={index}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="flex items-start gap-2 text-muted-foreground text-sm"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand-warm mt-2 flex-shrink-0"></span>
+                      {ingredient}
+                    </motion.li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="space-y-3">
+                <h3 className="font-semibold text-brand-purple flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-purple"></span>
+                  Instructions
+                </h3>
+                <ol className="space-y-3">
+                  {recipe.instructions?.map((instruction, index) => (
+                    <motion.li
+                      key={index}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2 + index * 0.05 }}
+                      className="flex gap-3 text-sm text-muted-foreground"
+                    >
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-purple-lighter text-brand-purple text-xs font-semibold flex items-center justify-center">
+                        {index + 1}
+                      </span>
+                      <span className="pt-0.5">{instruction}</span>
+                    </motion.li>
+                  ))}
+                </ol>
+              </div>
+            </motion.div>
           </div>
-          <div className="space-y-2">
-            <h3 className="font-medium text-[#4F2D9E]">Instructions:</h3>
-            <ol className="list-inside list-decimal space-y-2 text-gray-600">
-              {recipe.instructions?.map((instruction, index) => (
-                <motion.li 
-                  key={index}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 + index * 0.05 }}
-                >
-                  {instruction}
-                </motion.li>
-              ))}
-            </ol>
-          </div>
-        </motion.div>
+        </div>
       </DialogContent>
     </Dialog>
   );

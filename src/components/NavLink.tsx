@@ -10,16 +10,18 @@ interface NavLinkProps {
   activeClassName?: string;
 }
 
-const NavLink = ({ to, children, className = "", activeClassName = "bg-purple-100 text-purple-700" }: NavLinkProps) => {
+const NavLink = ({ to, children, className = "", activeClassName = "bg-brand-purple-lighter/70 text-brand-purple" }: NavLinkProps) => {
   const location = useLocation();
   const isActive = location.pathname === to;
-  
+
   return (
     <Link
       to={to}
       className={cn(
-        "px-4 py-2 rounded-md transition-colors",
-        isActive ? activeClassName : "hover:bg-gray-100",
+        "px-4 py-2 rounded-xl font-medium text-sm transition-all duration-200",
+        isActive
+          ? activeClassName
+          : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
         className
       )}
     >

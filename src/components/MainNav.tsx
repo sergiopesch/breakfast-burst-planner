@@ -1,33 +1,30 @@
 
 import React from 'react';
-import { CalendarDays, BookOpen } from "lucide-react";
+import { CalendarDays, BookOpen, ChefHat } from "lucide-react";
 import NavLink from './NavLink';
-import { useTheme } from './ThemeProvider';
 
 const MainNav = () => {
-  const theme = useTheme();
-  
   return (
-    <div className="flex space-x-1">
-      <NavLink 
-        to="/planner"
-        activeClassName={`bg-[${theme.colors.accent}] text-[${theme.colors.primary}]`}
-      >
-        <div className="flex items-center">
-          <CalendarDays className="h-4 w-4 mr-2" />
+    <nav className="flex items-center gap-1 p-1 rounded-xl bg-muted/40">
+      <NavLink to="/planner">
+        <div className="flex items-center gap-2">
+          <CalendarDays className="h-4 w-4" />
           <span>Planner</span>
         </div>
       </NavLink>
-      <NavLink 
-        to="/recipes"
-        activeClassName={`bg-[${theme.colors.accent}] text-[${theme.colors.primary}]`}
-      >
-        <div className="flex items-center">
-          <BookOpen className="h-4 w-4 mr-2" />
+      <NavLink to="/recipes">
+        <div className="flex items-center gap-2">
+          <BookOpen className="h-4 w-4" />
           <span>Recipes</span>
         </div>
       </NavLink>
-    </div>
+      <NavLink to="/create-recipe">
+        <div className="flex items-center gap-2">
+          <ChefHat className="h-4 w-4" />
+          <span>Create</span>
+        </div>
+      </NavLink>
+    </nav>
   );
 };
 

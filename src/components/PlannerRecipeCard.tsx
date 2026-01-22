@@ -1,9 +1,8 @@
 
 import React from 'react';
 import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, Coffee, Clock, Trash2 } from "lucide-react";
+import { Check, Clock, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Recipe } from '@/hooks/useMealPlanner';
 import ImageLoader from './ImageLoader';
@@ -15,11 +14,11 @@ interface PlannerRecipeCardProps {
   className?: string;
 }
 
-const PlannerRecipeCard: React.FC<PlannerRecipeCardProps> = ({ 
-  meal, 
-  onToggleStatus, 
+const PlannerRecipeCard: React.FC<PlannerRecipeCardProps> = ({
+  meal,
+  onToggleStatus,
   onRemove,
-  className 
+  className
 }) => {
   return (
     <motion.div
@@ -27,68 +26,82 @@ const PlannerRecipeCard: React.FC<PlannerRecipeCardProps> = ({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
       className={className}
     >
-      <Card className={cn(
-        "overflow-hidden transition-all duration-200 hover:shadow-md",
-        meal.status === 'completed' ? "border-l-4 border-l-green-500" : "border-l-4 border-l-[#4F2D9E]"
+      <div className={cn(
+        "group overflow-hidden rounded-xl border border-border/40 bg-card/50 transition-all duration-300 hover:shadow-elegant",
+        meal.status === 'completed' && "bg-secondary/30"
       )}>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1 flex-1">
-              <div className="flex items-center">
-                <Clock className="h-4 w-4 mr-2 text-gray-500" />
-                <p className="text-sm text-gray-500">{meal.time}</p>
-              </div>
-              <div className="flex items-center gap-3">
-                {meal.image && (
-                  <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg hidden sm:block">
-                    <ImageLoader 
-                      src={meal.image} 
-                      alt={meal.title}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                )}
-                <div>
-                  <h3 className="font-medium text-[#4F2D9E] flex items-center">
-                    <Coffee className="h-4 w-4 mr-2" />
-                    {meal.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 line-clamp-1">{meal.description}</p>
+        <div className="flex items-center p-4 gap-4">
+          {/* Image */}
+          {meal.image && (
+            <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-secondary">
+              <ImageLoader
+                src={meal.image}
+                alt={meal.title}
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            </div>
+          )}
+
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              {meal.time && (
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  <span>{meal.time}</span>
                 </div>
-              </div>
+              )}
+              {meal.status === 'completed' && (
+                <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-brand-success/10 text-brand-success">
+                  Done
+                </span>
+              )}
             </div>
-            <div className="flex items-center gap-1">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={onToggleStatus}
-                className={cn(
-                  "transition-all duration-300",
-                  meal.status === 'completed' 
-                    ? "text-green-600 hover:text-green-700 hover:bg-green-50" 
-                    : "text-[#4F2D9E] hover:bg-[#4F2D9E]/10"
-                )}
-              >
-                <Check className={cn(
-                  "h-4 w-4",
-                  meal.status === 'completed' ? "text-green-500" : "text-gray-400"
-                )} />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onRemove}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
+            <h3 className={cn(
+              "font-medium text-foreground truncate transition-colors",
+              meal.status === 'completed' && "text-muted-foreground line-through"
+            )}>
+              {meal.title}
+            </h3>
+            {meal.description && (
+              <p className="text-sm text-muted-foreground line-clamp-1 mt-0.5">
+                {meal.description}
+              </p>
+            )}
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Actions */}
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggleStatus}
+              className={cn(
+                "h-8 w-8 rounded-full transition-colors",
+                meal.status === 'completed'
+                  ? "text-brand-success hover:bg-brand-success/10"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+              )}
+            >
+              <Check className={cn(
+                "h-4 w-4",
+                meal.status === 'completed' && "stroke-[2.5px]"
+              )} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onRemove}
+              className="h-8 w-8 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
     </motion.div>
   );
 };

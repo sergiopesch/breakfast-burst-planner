@@ -1,8 +1,7 @@
 
 import React from 'react';
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart } from "lucide-react";
+import { Heart, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import FavoriteRecipesPanel from '@/components/FavoriteRecipesPanel';
 import { Recipe } from '@/hooks/useMealPlanner';
@@ -23,45 +22,50 @@ const FavoritesSection: React.FC<FavoritesSectionProps> = ({
   onAddToPlanner
 }) => {
   return (
-    <Card className="overflow-hidden shadow-sm">
-      <CardContent className="p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-medium text-[#4F2D9E] flex items-center">
-            <Heart className="h-5 w-5 mr-2" />
-            Favorite Recipes
-          </h2>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowFavorites(!showFavorites)}
-            className="text-[#4F2D9E] border-[#4F2D9E] hover:bg-[#4F2D9E]/10"
-            aria-expanded={showFavorites}
-            aria-controls="favorites-panel"
-          >
-            {showFavorites ? "Hide" : "Show"}
-          </Button>
-        </div>
-        
-        <AnimatePresence>
-          {showFavorites && (
-            <motion.div
-              id="favorites-panel"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="overflow-hidden"
-            >
-              <FavoriteRecipesPanel 
-                likedRecipes={likedRecipes}
-                selectedDate={selectedDate}
-                onAddToPlanner={onAddToPlanner}
-              />
-            </motion.div>
+    <div className="space-y-4">
+      <button
+        onClick={() => setShowFavorites(!showFavorites)}
+        className="w-full flex items-center justify-between py-2 group"
+        aria-expanded={showFavorites}
+        aria-controls="favorites-panel"
+      >
+        <div className="flex items-center gap-2">
+          <Heart className="h-4 w-4 text-muted-foreground" />
+          <span className="text-xs font-medium tracking-widest uppercase text-muted-foreground">
+            Favorites
+          </span>
+          {likedRecipes.length > 0 && (
+            <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-secondary text-secondary-foreground">
+              {likedRecipes.length}
+            </span>
           )}
-        </AnimatePresence>
-      </CardContent>
-    </Card>
+        </div>
+        {showFavorites ? (
+          <ChevronUp className="h-4 w-4 text-muted-foreground transition-transform group-hover:text-foreground" />
+        ) : (
+          <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-hover:text-foreground" />
+        )}
+      </button>
+
+      <AnimatePresence>
+        {showFavorites && (
+          <motion.div
+            id="favorites-panel"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
+          >
+            <FavoriteRecipesPanel
+              likedRecipes={likedRecipes}
+              selectedDate={selectedDate}
+              onAddToPlanner={onAddToPlanner}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 

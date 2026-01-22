@@ -35,7 +35,7 @@ const NavBar = () => {
             </span>
           </Link>
 
-          {user && <MainNav />}
+          <MainNav />
         </div>
 
         {user ? (

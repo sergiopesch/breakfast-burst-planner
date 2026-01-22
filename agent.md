@@ -155,7 +155,10 @@ npm run build
 
 ## Important Notes
 
-1. **Authentication**: Routes under `/planner`, `/recipes`, `/profile`, `/create-recipe` require authentication
-2. **Image Handling**: Images are stored in Supabase Storage with cache busting
-3. **Local Fallback**: The app falls back to localStorage when Supabase is unavailable
-4. **Accessibility**: Use ARIA labels, semantic HTML, and keyboard navigation support
+1. **No Login Required**: The app works fully without authentication. All features (planner, recipes, create recipe) are accessible to anonymous users via localStorage. Only `/profile` requires authentication.
+2. **Data Storage**:
+   - **Logged-in users**: Data syncs to Supabase (recipes, meal plans, images)
+   - **Anonymous users**: Data stored in localStorage (`likedRecipes`, `customRecipes`, `mealPlans`)
+3. **Image Handling**: For logged-in users, images are stored in Supabase Storage with cache busting. Anonymous users can use data URLs for local previews.
+4. **Local Fallback**: The app gracefully falls back to localStorage when Supabase is unavailable or user is not logged in.
+5. **Accessibility**: Use ARIA labels, semantic HTML, and keyboard navigation support

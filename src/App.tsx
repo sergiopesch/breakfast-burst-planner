@@ -60,37 +60,16 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Navigate to="/login" replace />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
-              <Route 
-                path="/planner" 
-                element={
-                  <ProtectedRoute>
-                    <Layout><Planner /></Layout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/recipes" 
-                element={
-                  <ProtectedRoute>
-                    <Layout><Recipes /></Layout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/create-recipe" 
-                element={
-                  <ProtectedRoute>
-                    <Layout><CreateRecipe /></Layout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/profile" 
+              <Route path="/planner" element={<Layout><Planner /></Layout>} />
+              <Route path="/recipes" element={<Layout><Recipes /></Layout>} />
+              <Route path="/create-recipe" element={<Layout><CreateRecipe /></Layout>} />
+              <Route
+                path="/profile"
                 element={
                   <ProtectedRoute>
                     <Layout><Profile /></Layout>
                   </ProtectedRoute>
-                } 
+                }
               />
               <Route path="*" element={<Layout><NotFound /></Layout>} />
             </Routes>

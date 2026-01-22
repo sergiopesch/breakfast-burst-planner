@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, UtensilsCrossed } from "lucide-react";
+import { Plus, UtensilsCrossed, Zap, Dumbbell, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PlannerRecipeCard from './PlannerRecipeCard';
 import { Recipe } from '@/hooks/useMealPlanner';
@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
+import { RecipeType } from '@/services/aiRecipeService';
 
 interface DayPlannerViewProps {
   date: Date;
@@ -16,11 +17,12 @@ interface DayPlannerViewProps {
   onToggleMealStatus: (index: number) => void;
   onRemoveMeal: (index: number) => void;
   onAddClick: () => void;
-  onGenerateRecipe: (servings: number) => void;
+  onGenerateRecipe: (servings: number, recipeType: RecipeType) => void;
 }
 
 interface RecipeForm {
   servings: number;
+  recipeType: RecipeType;
 }
 
 const DayPlannerView: React.FC<DayPlannerViewProps> = ({
@@ -32,11 +34,13 @@ const DayPlannerView: React.FC<DayPlannerViewProps> = ({
   onGenerateRecipe
 }) => {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [isGenerating, setIsGenerating] = React.useState(false);
   const { toast } = useToast();
 
   const form = useForm<RecipeForm>({
     defaultValues: {
-      servings: 2
+      servings: 2,
+      recipeType: 'simple'
     }
   });
 
@@ -51,13 +55,24 @@ const DayPlannerView: React.FC<DayPlannerViewProps> = ({
     setIsDialogOpen(true);
   };
 
-  const handleSubmit = (values: RecipeForm) => {
-    onGenerateRecipe(values.servings);
-    setIsDialogOpen(false);
-    toast({
-      title: "Recipe Generated",
-      description: `Breakfast recipe for ${values.servings} ${values.servings === 1 ? 'person' : 'people'} has been added.`
-    });
+  const handleSubmit = async (values: RecipeForm) => {
+    setIsGenerating(true);
+    try {
+      await onGenerateRecipe(values.servings, values.recipeType);
+      setIsDialogOpen(false);
+      toast({
+        title: "Recipe Generated",
+        description: `${values.recipeType === 'high-protein' ? 'High protein' : 'Simple'} breakfast for ${values.servings} ${values.servings === 1 ? 'person' : 'people'} has been added.`
+      });
+    } catch (error) {
+      toast({
+        title: "Generation Failed",
+        description: "Could not generate recipe. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -110,17 +125,84 @@ const DayPlannerView: React.FC<DayPlannerViewProps> = ({
         </AnimatePresence>
       </motion.div>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={(open) => !isGenerating && setIsDialogOpen(open)}>
         <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-xl border-border/50 rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-lg font-medium">Create Breakfast Recipe</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
-              How many people will be having breakfast?
+              Choose your recipe type and servings - AI will generate the perfect breakfast
             </DialogDescription>
           </DialogHeader>
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+              {/* Recipe Type Selection */}
+              <FormField
+                control={form.control}
+                name="recipeType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">What kind of breakfast?</FormLabel>
+                    <FormControl>
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => field.onChange('simple')}
+                          className={`relative flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all duration-200 ${
+                            field.value === 'simple'
+                              ? 'border-primary bg-primary/10 shadow-md'
+                              : 'border-border/50 hover:border-border hover:bg-secondary/30'
+                          }`}
+                        >
+                          <Zap className={`h-8 w-8 mb-2 ${field.value === 'simple' ? 'text-primary' : 'text-muted-foreground'}`} />
+                          <span className={`font-medium text-sm ${field.value === 'simple' ? 'text-primary' : 'text-foreground'}`}>
+                            Simple
+                          </span>
+                          <span className="text-xs text-muted-foreground mt-1 text-center">
+                            Quick & easy
+                          </span>
+                          {field.value === 'simple' && (
+                            <motion.div
+                              layoutId="recipeTypeIndicator"
+                              className="absolute inset-0 border-2 border-primary rounded-xl"
+                              initial={false}
+                              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                            />
+                          )}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => field.onChange('high-protein')}
+                          className={`relative flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all duration-200 ${
+                            field.value === 'high-protein'
+                              ? 'border-primary bg-primary/10 shadow-md'
+                              : 'border-border/50 hover:border-border hover:bg-secondary/30'
+                          }`}
+                        >
+                          <Dumbbell className={`h-8 w-8 mb-2 ${field.value === 'high-protein' ? 'text-primary' : 'text-muted-foreground'}`} />
+                          <span className={`font-medium text-sm ${field.value === 'high-protein' ? 'text-primary' : 'text-foreground'}`}>
+                            High Protein
+                          </span>
+                          <span className="text-xs text-muted-foreground mt-1 text-center">
+                            25g+ protein
+                          </span>
+                          {field.value === 'high-protein' && (
+                            <motion.div
+                              layoutId="recipeTypeIndicator"
+                              className="absolute inset-0 border-2 border-primary rounded-xl"
+                              initial={false}
+                              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                            />
+                          )}
+                        </button>
+                      </div>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              {/* Servings Selection */}
               <FormField
                 control={form.control}
                 name="servings"
@@ -132,6 +214,7 @@ const DayPlannerView: React.FC<DayPlannerViewProps> = ({
                         className="w-full border border-border/50 rounded-lg p-3 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-foreground/10"
                         {...field}
                         onChange={e => field.onChange(parseInt(e.target.value))}
+                        disabled={isGenerating}
                       >
                         {[1, 2, 3, 4, 5, 6].map(num => (
                           <option key={num} value={num}>
@@ -150,14 +233,23 @@ const DayPlannerView: React.FC<DayPlannerViewProps> = ({
                   variant="ghost"
                   onClick={() => setIsDialogOpen(false)}
                   className="rounded-full"
+                  disabled={isGenerating}
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
-                  className="btn-primary rounded-full"
+                  className="btn-primary rounded-full min-w-[140px]"
+                  disabled={isGenerating}
                 >
-                  Generate Recipe
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    'Generate Recipe'
+                  )}
                 </Button>
               </div>
             </form>

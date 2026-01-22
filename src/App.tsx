@@ -1,4 +1,5 @@
 
+import { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,45 +8,55 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import ThemeProvider from "./components/ThemeProvider";
 import Layout from "./components/Layout";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import Planner from "./pages/Planner";
-import Recipes from "./pages/Recipes";
-import CreateRecipe from "./pages/CreateRecipe";
-import Profile from "./pages/Profile"; 
-import Login from "./pages/Login";
-import ProtectedRoute from "./components/ProtectedRoute";
-import { useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+
+// Lazy load pages for better performance (code splitting)
+const Index = lazy(() => import("./pages/Index"));
+const Login = lazy(() => import("./pages/Login"));
+const Planner = lazy(() => import("./pages/Planner"));
+const Recipes = lazy(() => import("./pages/Recipes"));
+const CreateRecipe = lazy(() => import("./pages/CreateRecipe"));
+const Profile = lazy(() => import("./pages/Profile"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const ProtectedRoute = lazy(() => import("./components/ProtectedRoute"));
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="flex flex-col items-center gap-4">
+      <div className="relative w-12 h-12">
+        <div className="absolute inset-0 rounded-full border-2 border-foreground/10"></div>
+        <div className="absolute inset-0 rounded-full border-2 border-foreground border-t-transparent animate-spin"></div>
+      </div>
+      <p className="text-sm text-muted-foreground">Loading...</p>
+    </div>
+  </div>
+);
 
 const AuthCallback = () => {
   useEffect(() => {
-    // This component captures the OAuth redirect and allows Supabase to handle the authentication
-    console.log("AuthCallback component mounted");
-    
     const handleAuthCallback = async () => {
-      const { hash, search } = window.location;
-      console.log("Auth callback URL info:", { hash, search });
-      
-      // Let Supabase handle the hash fragment (it contains the access token)
       const { data, error } = await supabase.auth.getSession();
-      console.log("Auth session result:", { data, error });
-      
       if (error) {
         console.error("Auth callback error:", error);
       }
-      
-      // Redirect to the planner page after authentication
       window.location.href = "/planner";
     };
-    
     handleAuthCallback();
   }, []);
 
-  return <div className="flex justify-center items-center h-screen">Completing authentication...</div>;
+  return <PageLoader />;
 };
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000, // 1 minute
+      gcTime: 5 * 60 * 1000, // 5 minutes (formerly cacheTime)
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -55,24 +66,28 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Layout><Index /></Layout>} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Navigate to="/login" replace />} />
-              <Route path="/auth/callback" element={<AuthCallback />} />
-              <Route path="/planner" element={<Layout><Planner /></Layout>} />
-              <Route path="/recipes" element={<Layout><Recipes /></Layout>} />
-              <Route path="/create-recipe" element={<Layout><CreateRecipe /></Layout>} />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <Layout><Profile /></Layout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="*" element={<Layout><NotFound /></Layout>} />
-            </Routes>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/" element={<Layout><Index /></Layout>} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Navigate to="/login" replace />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
+                <Route path="/planner" element={<Layout><Planner /></Layout>} />
+                <Route path="/recipes" element={<Layout><Recipes /></Layout>} />
+                <Route path="/create-recipe" element={<Layout><CreateRecipe /></Layout>} />
+                <Route
+                  path="/profile"
+                  element={
+                    <Suspense fallback={<PageLoader />}>
+                      <ProtectedRoute>
+                        <Layout><Profile /></Layout>
+                      </ProtectedRoute>
+                    </Suspense>
+                  }
+                />
+                <Route path="*" element={<Layout><NotFound /></Layout>} />
+              </Routes>
+            </Suspense>
           </BrowserRouter>
         </AuthProvider>
       </ThemeProvider>

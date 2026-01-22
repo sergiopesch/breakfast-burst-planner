@@ -180,10 +180,10 @@ export const useMealPlanner = (refreshTrigger = 0) => {
     const loadFromLocalStorage = () => {
       localStorage.removeItem('cache-timestamp');
       localStorage.setItem('cache-timestamp', Date.now().toString());
-      
+
       const storedRecipes = localStorage.getItem('likedRecipes');
       const storedMeals = localStorage.getItem('plannedMeals');
-      
+
       if (!storedRecipes) {
         const sampleRecipes: Recipe[] = [
           {
@@ -247,8 +247,11 @@ export const useMealPlanner = (refreshTrigger = 0) => {
       if (storedMeals) {
         setPlannedMeals(JSON.parse(storedMeals));
       }
+
+      // Set loading to false since we returned early without reaching the finally block
+      setTimeout(() => setIsLoading(false), 400);
     };
-    
+
     loadData();
   }, [user, refreshTrigger, forceCacheRefresh, toast]);
 

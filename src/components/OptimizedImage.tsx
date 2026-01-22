@@ -162,7 +162,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
           onError={handleError}
           loading={priority ? 'eager' : 'lazy'}
           decoding="async"
-          crossOrigin="anonymous"
+          referrerPolicy="no-referrer"
         />
       )}
 

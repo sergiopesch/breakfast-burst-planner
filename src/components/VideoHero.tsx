@@ -104,6 +104,7 @@ const VideoHero: React.FC<VideoHeroProps> = ({
                 src={posterSrc}
                 alt=""
                 className="absolute inset-0 w-full h-full object-cover"
+                referrerPolicy="no-referrer"
               />
             )}
 
@@ -128,6 +129,7 @@ const VideoHero: React.FC<VideoHeroProps> = ({
             src={fallbackImageSrc || posterSrc}
             alt=""
             className="absolute inset-0 w-full h-full object-cover"
+            referrerPolicy="no-referrer"
           />
         )}
 

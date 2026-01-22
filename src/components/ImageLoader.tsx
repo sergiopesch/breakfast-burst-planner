@@ -107,7 +107,7 @@ const ImageLoader: React.FC<ImageLoaderProps> = ({
         className={`${className} ${loading ? 'hidden' : ''}`}
         loading="lazy"
         decoding="async"
-        crossOrigin="anonymous"
+        referrerPolicy="no-referrer"
       />
     </>
   );

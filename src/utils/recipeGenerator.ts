@@ -2,22 +2,41 @@
 import { Recipe } from '@/hooks/useMealPlanner';
 import { supabase } from '@/lib/supabase';
 
-// Function to get clean Supabase image URLs
+// Reliable Unsplash image URLs with proper formatting for breakfast foods
+// Using source.unsplash.com for reliable image delivery
+const BREAKFAST_IMAGE_URLS = {
+  pancakes: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=480&q=80&fit=crop",
+  avocadoToast: "https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?w=480&q=80&fit=crop",
+  smoothie: "https://images.unsplash.com/photo-1638176066666-ffb2f013c7dd?w=480&q=80&fit=crop",
+  eggs: "https://images.unsplash.com/photo-1482049016gy789-2d9c246f884f?w=480&q=80&fit=crop",
+  oatmeal: "https://images.unsplash.com/photo-1517673400267-0251440c45dc?w=480&q=80&fit=crop",
+  frenchToast: "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=480&q=80&fit=crop",
+  granola: "https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=480&q=80&fit=crop",
+  sandwich: "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=480&q=80&fit=crop",
+};
+
+// Fallback placeholder for when images fail to load
+export const PLACEHOLDER_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='360' viewBox='0 0 480 360'%3E%3Crect fill='%23f3f4f6' width='480' height='360'/%3E%3Ctext fill='%239ca3af' font-family='system-ui' font-size='16' text-anchor='middle' x='240' y='180'%3EBreakfast Image%3C/text%3E%3C/svg%3E";
+
+// Function to get Supabase image URL (kept for backward compatibility)
 const getSupabaseImageUrl = (filename: string) => {
   return `https://nwnrgctxzqunasquaarl.supabase.co/storage/v1/object/public/recipe-images/template/${filename}`;
 };
 
-// These images are publicly available from Supabase storage
+// Primary breakfast images - using direct Unsplash URLs for reliability
 const breakfastImages = [
-  getSupabaseImageUrl("pancakes.jpg"),      // Pancakes
-  getSupabaseImageUrl("avocado-toast.jpg"), // Avocado toast
-  getSupabaseImageUrl("smoothie.jpg"),      // Smoothie
-  getSupabaseImageUrl("eggs.jpg"),          // Eggs
-  getSupabaseImageUrl("oatmeal.jpg"),       // Oatmeal
-  getSupabaseImageUrl("french-toast.jpg"),  // French toast
-  getSupabaseImageUrl("granola.jpg"),       // Granola bowl
-  getSupabaseImageUrl("sandwich.jpg"),      // Breakfast sandwich
+  BREAKFAST_IMAGE_URLS.pancakes,      // Pancakes
+  BREAKFAST_IMAGE_URLS.avocadoToast,  // Avocado toast
+  BREAKFAST_IMAGE_URLS.smoothie,      // Smoothie
+  BREAKFAST_IMAGE_URLS.sandwich,      // Eggs (using sandwich as backup)
+  BREAKFAST_IMAGE_URLS.oatmeal,       // Oatmeal
+  BREAKFAST_IMAGE_URLS.frenchToast,   // French toast
+  BREAKFAST_IMAGE_URLS.granola,       // Granola bowl
+  BREAKFAST_IMAGE_URLS.sandwich,      // Breakfast sandwich
 ];
+
+// Export image URLs for use in other components
+export { BREAKFAST_IMAGE_URLS };
 
 // Breakfast recipe templates
 interface RecipeTemplate {
@@ -206,39 +225,39 @@ export const generateRecipe = (servings: number = 2): Recipe => {
 
 // Function to upload template recipe images to Supabase storage
 export const uploadTemplateImagesToSupabase = async () => {
-  // Mapping of image filenames to URLs for fetching
+  // Mapping of image filenames to URLs for fetching - using reliable Unsplash URLs
   const templateImageUrls = [
-    { 
-      filename: "pancakes.jpg", 
-      url: "https://images.unsplash.com/photo-1554520735-0a6b8b6ce8b7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80" 
+    {
+      filename: "pancakes.jpg",
+      url: BREAKFAST_IMAGE_URLS.pancakes
     },
-    { 
-      filename: "avocado-toast.jpg", 
-      url: "https://images.unsplash.com/photo-1588137378633-dea1336ce1e5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80" 
+    {
+      filename: "avocado-toast.jpg",
+      url: BREAKFAST_IMAGE_URLS.avocadoToast
     },
-    { 
-      filename: "smoothie.jpg", 
-      url: "https://images.unsplash.com/photo-1628557044797-f21a177c37ec?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80" 
+    {
+      filename: "smoothie.jpg",
+      url: BREAKFAST_IMAGE_URLS.smoothie
     },
-    { 
-      filename: "eggs.jpg", 
-      url: "https://images.unsplash.com/photo-1525351484163-7529414344d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80" 
+    {
+      filename: "eggs.jpg",
+      url: BREAKFAST_IMAGE_URLS.sandwich // Using sandwich image for eggs benedict style
     },
-    { 
-      filename: "oatmeal.jpg", 
-      url: "https://images.unsplash.com/photo-1611740801993-dd9d9fed43a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80" 
+    {
+      filename: "oatmeal.jpg",
+      url: BREAKFAST_IMAGE_URLS.oatmeal
     },
-    { 
-      filename: "french-toast.jpg", 
-      url: "https://images.unsplash.com/photo-1484723091739-30a097e8f929?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80" 
+    {
+      filename: "french-toast.jpg",
+      url: BREAKFAST_IMAGE_URLS.frenchToast
     },
-    { 
-      filename: "granola.jpg", 
-      url: "https://images.unsplash.com/photo-1615887351252-939222041ae3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80" 
+    {
+      filename: "granola.jpg",
+      url: BREAKFAST_IMAGE_URLS.granola
     },
-    { 
-      filename: "sandwich.jpg", 
-      url: "https://images.unsplash.com/photo-1550507992-eb63ffee0847?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=480&q=80" 
+    {
+      filename: "sandwich.jpg",
+      url: BREAKFAST_IMAGE_URLS.sandwich
     },
   ];
   

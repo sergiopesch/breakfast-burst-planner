@@ -219,6 +219,64 @@ toast({
 | Recipe card | `src/components/RecipeCard.tsx` |
 | Navigation | `src/components/NavBar.tsx` |
 | Layout | `src/components/Layout.tsx` |
+| Image loading | `src/components/ImageLoader.tsx` |
+| Recipe generation | `src/utils/recipeGenerator.ts` |
+
+## Image System
+
+The app uses a robust image handling system for displaying recipe images reliably.
+
+### Image URLs
+
+All recipe images use reliable Unsplash URLs defined in `src/utils/recipeGenerator.ts`:
+
+```typescript
+import { BREAKFAST_IMAGE_URLS } from '@/utils/recipeGenerator';
+
+// Available images:
+BREAKFAST_IMAGE_URLS.pancakes      // Fluffy pancakes
+BREAKFAST_IMAGE_URLS.avocadoToast  // Avocado toast
+BREAKFAST_IMAGE_URLS.smoothie      // Smoothie bowl
+BREAKFAST_IMAGE_URLS.oatmeal       // Oatmeal/overnight oats
+BREAKFAST_IMAGE_URLS.frenchToast   // French toast
+BREAKFAST_IMAGE_URLS.granola       // Granola parfait
+BREAKFAST_IMAGE_URLS.sandwich      // Breakfast sandwich/eggs
+```
+
+### ImageLoader Component
+
+Always use the `ImageLoader` component for displaying recipe images:
+
+```tsx
+import ImageLoader from '@/components/ImageLoader';
+
+<ImageLoader
+  src={recipe.image}
+  alt={recipe.title}
+  className="w-full h-full object-cover"
+  fallbackClassName="w-full h-full flex items-center justify-center bg-secondary"
+  showPlaceholder={true}  // Shows breakfast icon on error
+/>
+```
+
+The component handles:
+- **Loading states** - Displays spinner while loading
+- **Error states** - Shows fallback icons when images fail
+- **Automatic retry** - Retries failed Unsplash images with different parameters
+- **Lazy loading** - Improves performance
+- **Cache busting** - For Supabase URLs
+
+### Adding New Recipe Images
+
+When adding new recipes, use images from `BREAKFAST_IMAGE_URLS`:
+
+```typescript
+const newRecipe = {
+  title: "My Recipe",
+  image: BREAKFAST_IMAGE_URLS.pancakes,
+  // ... other fields
+};
+```
 
 ## Supabase Tables
 

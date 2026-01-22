@@ -29,19 +29,30 @@ Organize your breakfast schedule with our intuitive calendar interface:
 - Plan an entire week of breakfasts in advance
 - Easily modify your plan as needed
 
+### Image System
+The app includes a robust image handling system:
+- **Primary images** sourced from Unsplash with optimized URLs for fast loading
+- **Smart fallbacks** with automatic retry on failed image loads
+- **Graceful degradation** with placeholder icons when images are unavailable
+- **Lazy loading** for improved performance
+- **ImageLoader component** handles all image states (loading, error, success)
+
 ### User Profiles
 - Create a personal account to save your preferences
 - Access your meal plans and favorite recipes from any device
+- **No login required** - app works fully without authentication using localStorage
 
 ## Technologies Used
 
-- React with TypeScript
+- React 18 with TypeScript
+- Vite with SWC for fast builds
 - Tailwind CSS for styling
 - Shadcn UI for components
-- Supabase for backend services (authentication, database)
+- Supabase for backend services (authentication, database, storage)
 - React Router for navigation
 - Framer Motion for animations
-- Tanstack React Query for data fetching
+- TanStack React Query for data fetching
+- React Hook Form + Zod for form validation
 
 ## Getting Started
 
@@ -55,10 +66,28 @@ git clone <YOUR_GIT_URL>
 cd breakfast-burst-planner
 
 # Install dependencies
-npm i
+npm install
 
 # Start the development server
 npm run dev
+```
+
+The app will be available at `http://localhost:8080`.
+
+## Project Structure
+
+```
+src/
+├── components/       # React components
+│   ├── ui/          # shadcn/ui primitive components
+│   ├── ImageLoader.tsx  # Image loading with fallbacks
+│   └── *.tsx        # Custom application components
+├── pages/           # Page components (routes)
+├── hooks/           # Custom React hooks
+├── lib/             # Utility libraries
+├── utils/           # Helper functions
+│   └── recipeGenerator.ts  # Recipe generation & image URLs
+└── types/           # TypeScript type definitions
 ```
 
 ## Deployment

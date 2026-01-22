@@ -40,6 +40,8 @@ src/
 - `src/lib/supabase.ts` - Supabase client configuration
 - `tailwind.config.ts` - Tailwind CSS configuration with custom colors
 - `src/index.css` - Global styles and custom CSS utilities
+- `src/components/ImageLoader.tsx` - Image loading with fallback handling
+- `src/utils/recipeGenerator.ts` - Recipe generation and image URL constants
 
 ## Design System
 
@@ -159,6 +161,30 @@ npm run build
 2. **Data Storage**:
    - **Logged-in users**: Data syncs to Supabase (recipes, meal plans, images)
    - **Anonymous users**: Data stored in localStorage (`likedRecipes`, `customRecipes`, `mealPlans`)
-3. **Image Handling**: For logged-in users, images are stored in Supabase Storage with cache busting. Anonymous users can use data URLs for local previews.
+3. **Image Handling**:
+   - Use `ImageLoader` component for all recipe images
+   - Import `BREAKFAST_IMAGE_URLS` from `@/utils/recipeGenerator` for reliable image URLs
+   - ImageLoader handles loading states, errors, retries, and fallbacks automatically
+   - For logged-in users, images can be stored in Supabase Storage with cache busting
 4. **Local Fallback**: The app gracefully falls back to localStorage when Supabase is unavailable or user is not logged in.
 5. **Accessibility**: Use ARIA labels, semantic HTML, and keyboard navigation support
+
+## Image System
+
+Always use the `ImageLoader` component for recipe images:
+
+```tsx
+import ImageLoader from '@/components/ImageLoader';
+import { BREAKFAST_IMAGE_URLS } from '@/utils/recipeGenerator';
+
+// Using ImageLoader
+<ImageLoader
+  src={BREAKFAST_IMAGE_URLS.pancakes}
+  alt="Pancakes"
+  className="w-full h-full object-cover"
+/>
+
+// Available images:
+// BREAKFAST_IMAGE_URLS.pancakes, .avocadoToast, .smoothie,
+// .oatmeal, .frenchToast, .granola, .sandwich
+```

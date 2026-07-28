@@ -1,9 +1,14 @@
 {
   "name": "vite_react_shadcn_ts",
   "private": true,
+  "packageManager": "npm@11.17.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "audit:ci": "node scripts/audit-ci.mjs",
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",

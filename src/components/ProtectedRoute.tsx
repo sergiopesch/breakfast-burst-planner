@@ -1,5 +1,5 @@
 
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
 import { ROUTE_PATHS } from '@/routePaths';

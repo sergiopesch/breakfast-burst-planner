@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => ({
       output: {
         manualChunks: {
           // Vendor chunks for better caching
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'react-vendor': ['react', 'react-dom', 'react-router'],
           'ui-vendor': ['framer-motion', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
           'form-vendor': ['react-hook-form', '@hookform/resolvers', 'zod'],
           'date-vendor': ['date-fns'],

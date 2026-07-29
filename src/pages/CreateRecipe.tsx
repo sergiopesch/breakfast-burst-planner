@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router';
 import { useForm } from "react-hook-form";
 import { v4 as uuidv4 } from 'uuid';
 import { Save, Plus, X, ArrowLeft, Image as ImageIcon } from "lucide-react";

@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import RecipeCard from '../components/RecipeCard';
 import CtaButton from '../components/CtaButton';
 import { Button } from "@/components/ui/button";

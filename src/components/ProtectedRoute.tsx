@@ -1,7 +1,8 @@
 
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
+import { ROUTE_PATHS } from '@/routePaths';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -27,7 +28,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowAnonOn =
 
   if (!user && !allowAnonymous) {
     // Save the current location so we can redirect back after login
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to={ROUTE_PATHS.login} state={{ from: location }} replace />;
   }
 
   return <>{children}</>;

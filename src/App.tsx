@@ -17,6 +17,7 @@ import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useEffect } from "react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { ROUTE_PATHS } from "@/routePaths";
 
 const AuthCallback = () => {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ const AuthCallback = () => {
     const handleAuthCallback = async () => {
       if (!isSupabaseConfigured()) {
         console.warn("Supabase not configured, redirecting to home");
-        navigate("/", { replace: true });
+        navigate(ROUTE_PATHS.home, { replace: true });
         return;
       }
 
@@ -44,7 +45,7 @@ const AuthCallback = () => {
       }
 
       // Navigate to the planner page after authentication (preserves React state)
-      navigate("/planner", { replace: true });
+      navigate(ROUTE_PATHS.planner, { replace: true });
     };
 
     handleAuthCallback();
@@ -78,22 +79,22 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<Layout><Index /></Layout>} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Navigate to="/login" replace />} />
-                <Route path="/auth/callback" element={<AuthCallback />} />
-                <Route path="/planner" element={<Layout><Planner /></Layout>} />
-                <Route path="/recipes" element={<Layout><Recipes /></Layout>} />
-                <Route path="/create-recipe" element={<Layout><CreateRecipe /></Layout>} />
+                <Route path={ROUTE_PATHS.home} element={<Layout><Index /></Layout>} />
+                <Route path={ROUTE_PATHS.login} element={<Login />} />
+                <Route path={ROUTE_PATHS.register} element={<Navigate to={ROUTE_PATHS.login} replace />} />
+                <Route path={ROUTE_PATHS.authCallback} element={<AuthCallback />} />
+                <Route path={ROUTE_PATHS.planner} element={<Layout><Planner /></Layout>} />
+                <Route path={ROUTE_PATHS.recipes} element={<Layout><Recipes /></Layout>} />
+                <Route path={ROUTE_PATHS.createRecipe} element={<Layout><CreateRecipe /></Layout>} />
                 <Route
-                  path="/profile"
+                  path={ROUTE_PATHS.profile}
                   element={
                     <ProtectedRoute>
                       <Layout><Profile /></Layout>
                     </ProtectedRoute>
                   }
                 />
-                <Route path="*" element={<Layout><NotFound /></Layout>} />
+                <Route path={ROUTE_PATHS.fallback} element={<Layout><NotFound /></Layout>} />
               </Routes>
             </BrowserRouter>
           </AuthProvider>

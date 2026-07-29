@@ -28,6 +28,11 @@ test("uses the supported React Router 8 package and entry point", async () => {
     await readFile(new URL("../package-lock.json", import.meta.url), "utf8"),
   );
 
+  assert.equal(packageJson.engines.node, ">=22.22.0");
+  assert.equal(packageJson.dependencies.react, "^19.2.7");
+  assert.equal(packageJson.dependencies["react-dom"], "^19.2.7");
+  assert.equal(packageJson.devDependencies["@types/react"], "^19.2.7");
+  assert.equal(packageJson.devDependencies["@types/react-dom"], "^19.2.3");
   assert.equal(packageJson.dependencies["react-router"], "8.3.0");
   assert.equal(packageJson.dependencies["react-router-dom"], undefined);
   assert.equal(packageLock.packages["node_modules/react-router"].version, "8.3.0");

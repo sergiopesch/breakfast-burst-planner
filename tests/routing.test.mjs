@@ -17,3 +17,21 @@ test("preserves authentication navigation destinations", () => {
   assert.equal(ROUTE_PATHS.authCallback, "/auth/callback");
   assert.equal(ROUTE_PATHS.planner, "/planner");
 });
+
+test("keeps the React Router 8 packages aligned on the patched release", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const packageJson = JSON.parse(
+    await readFile(new URL("../package.json", import.meta.url), "utf8"),
+  );
+  const packageLock = JSON.parse(
+    await readFile(new URL("../package-lock.json", import.meta.url), "utf8"),
+  );
+
+  assert.equal(packageJson.dependencies["react-router-dom"], "^8.3.0");
+  assert.equal(packageLock.packages["node_modules/react-router"].version, "8.3.0");
+  assert.equal(packageLock.packages["node_modules/react-router-dom"].version, "8.3.0");
+  assert.equal(
+    packageLock.packages["node_modules/react-router-dom"].dependencies["react-router"],
+    "8.3.0",
+  );
+});

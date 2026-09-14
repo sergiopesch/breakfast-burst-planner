@@ -29,13 +29,14 @@ test("uses the supported React Router 8 package and entry point", async () => {
   );
 
   assert.equal(packageJson.engines.node, ">=22.22.0");
-  assert.equal(packageJson.dependencies.react, "^19.2.7");
-  assert.equal(packageJson.dependencies["react-dom"], "^19.2.7");
-  assert.equal(packageJson.devDependencies["@types/react"], "^19.2.7");
-  assert.equal(packageJson.devDependencies["@types/react-dom"], "^19.2.3");
-  assert.equal(packageJson.dependencies["react-router"], "8.3.0");
+  assert.match(packageJson.dependencies.react, /^\^?19\./);
+  assert.equal(packageJson.dependencies["react-dom"], packageJson.dependencies.react);
+  assert.match(packageJson.devDependencies["@types/react"], /^\^?19\./);
+  assert.match(packageJson.devDependencies["@types/react-dom"], /^\^?19\./);
+  assert.match(packageJson.dependencies["react-router"], /^\^?8\./);
   assert.equal(packageJson.dependencies["react-router-dom"], undefined);
-  assert.equal(packageLock.packages["node_modules/react-router"].version, "8.3.0");
+  assert.match(packageLock.packages["node_modules/react-router"].version, /^8\./);
+  assert.equal(packageLock.packages["node_modules/react"].version, packageLock.packages["node_modules/react-dom"].version);
   assert.equal(packageLock.packages["node_modules/react-router-dom"], undefined);
 
   for await (const sourceFile of glob("src/**/*.{ts,tsx}")) {

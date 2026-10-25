@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => ({
           // Vendor chunks for better caching
           'react-vendor': ['react', 'react-dom', 'react-router'],
           'ui-vendor': ['framer-motion', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
-          'form-vendor': ['react-hook-form', '@hookform/resolvers', 'zod'],
+          'form-vendor': ['react-hook-form', 'zod'],
           'date-vendor': ['date-fns'],
           'supabase': ['@supabase/supabase-js'],
         },
